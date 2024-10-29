@@ -126,3 +126,9 @@ enum IActivityType {
   CREATE_REPLY = "CREATE_REPLY",
   REPLY_LIKE = "REPLY_LIKE",
 }
+
+interface StoredFile {
+  id: string
+  name: string
+  url: string
+}

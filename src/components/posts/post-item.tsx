@@ -190,7 +190,7 @@ const PostItem = (props: PostItemProps) => {
 
               return (
                 <div
-                  key={index + 1}
+                  key={image.url}
                   className={cn(
                     "relative cursor-pointer overflow-hidden rounded",
                     post.selectedFile.length === 3 &&

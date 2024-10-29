@@ -48,7 +48,7 @@ const ReplyCommentForm = (props: ReplyCommentFormProps) => {
 
   useEffect(() => {
     form.setFocus("content")
-  }, [form.setFocus])
+  }, [form])
 
   async function handleOnSubmit(data: z.infer<typeof replySchema>) {
     // await createCommentMutation.mutateAsync({

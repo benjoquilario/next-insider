@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useCallback, useState } from "react"
+import React from "react"
 import { useWatch, type Control, type UseFormSetValue } from "react-hook-form"
 import ImageThumbnail from "@/components/image-thumbnail"
 import { Button } from "@/components/ui/button"
@@ -20,7 +20,7 @@ type PostUploadProps = {
 const PostUpload: React.FC<PostUploadProps> = (props) => {
   const { control, setValue, children, disabled, selectedFile } = props
 
-  const [currentImages, setCurrentImages] = useState<
+  const [currentImages, setCurrentImages] = React.useState<
     ISelectedFile[] | undefined
   >(selectedFile)
 
@@ -35,8 +35,6 @@ const PostUpload: React.FC<PostUploadProps> = (props) => {
     defaultValue: [],
   })
 
-  console.log(currentImages, selectedImage)
-
   const removeImage = (imageName: string) => {
     setValue(
       "selectedFile",
@@ -44,12 +42,13 @@ const PostUpload: React.FC<PostUploadProps> = (props) => {
     )
   }
 
-  const handleRemove = useCallback((id: string, key: string) => {
+  const handleRemove = React.useCallback((id: string, key: string) => {
     setDeletedFiles(id)
     setDeletedKeys(key)
     const removeItem = currentImages?.filter((image) => image.id !== id)
 
     setCurrentImages(removeItem)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   return (
@@ -79,10 +78,10 @@ const PostUpload: React.FC<PostUploadProps> = (props) => {
           : null}
 
         {selectedImage.length
-          ? selectedImage?.map((image, index) => {
+          ? selectedImage?.map((image) => {
               return (
                 <ImageThumbnail
-                  key={index}
+                  key={image.name}
                   image={image}
                   removeImage={removeImage}
                 />

@@ -27,6 +27,7 @@ import PostUpload from "./post-upload"
 import { useUpdateDeleteMutation } from "@/hooks/useUpdateDeletePost"
 import { useCreatePostMutation } from "@/hooks/useCreatePostMutation"
 import { Cross2Icon } from "@radix-ui/react-icons"
+import { toast } from "sonner"
 
 type CreatePostFormProps = {
   userId?: string
@@ -96,38 +97,37 @@ const CreatePostForm = (props: CreatePostFormProps) => {
   }, [selectedPostId, form, selectedPost])
 
   const handleOnSubmit = async function (values: IPostValues) {
-    let uploadImages
-
-    if (values.selectedFile.length) {
-      uploadImages = await startUpload(values.selectedFile)
-    }
-
     if (isError) return
 
-    if (isEditing && selectedPostId) {
-      updatePostMutation.mutate({
-        content: values.content,
-        selectedFile: uploadImages
-          ? uploadImages?.map((image) => ({
-              url: image.url,
-              key: image.key,
-            }))
-          : null,
-        postId: selectedPostId,
-        fileIds: deletedFiles,
-        deletedKeys,
-      })
-    } else {
-      createPostMutation.mutate({
-        content: values.content,
-        selectedFile: uploadImages
-          ? uploadImages?.map((image) => ({
-              url: image.url,
-              key: image.key,
-            }))
-          : null,
-      })
-    }
+    toast.promise(
+      startUpload(values.selectedFile ?? []).then((data) => {
+        if (isEditing && selectedPostId) {
+          updatePostMutation.mutate({
+            content: values.content,
+            selectedFile: data
+              ? data?.map((image) => ({
+                  url: image.url,
+                  key: image.key,
+                }))
+              : null,
+            postId: selectedPostId,
+            fileIds: deletedFiles,
+            deletedKeys,
+          })
+        } else {
+          createPostMutation.mutate({
+            content: values.content,
+            selectedFile: data
+              ? data?.map((image) => ({
+                  url: image.url,
+                  key: image.key,
+                }))
+              : null,
+          })
+        }
+      }),
+      {}
+    )
   }
 
   return (

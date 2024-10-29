@@ -35,7 +35,6 @@ const Login = () => {
   const form = useForm<ICredentials>({
     resolver: zodResolver(credentialsValidator),
   })
-  const router = useRouter()
   const [isPending, startTransition] = useTransition()
   const [error, setError] = useState("")
 

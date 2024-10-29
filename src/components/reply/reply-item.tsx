@@ -42,8 +42,6 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import TextareaAutoSize from "react-textarea-autosize"
 import * as z from "zod"
 import { cn } from "@/lib/utils"
-import useCommentStore from "@/store/comment"
-import { useLikeCommentMutation } from "@/hooks/useLikeComment"
 import { useSession } from "next-auth/react"
 import useReplyCommentStore from "@/store/reply"
 import { useUpdateDeleteRepliesMutation } from "@/hooks/useUpdateDeleteReplies"
@@ -77,11 +75,10 @@ const ReplyItem = (props: ReplyItemProps) => {
       content: reply.content,
     })
 
-  console.log(reply, commentId)
-
   const setSelectedReply = useReplyCommentStore(
     (store) => store.setSelectedReply
   )
+
   const selectedReply = useReplyCommentStore((store) => store.selectedReply)
   const replyId = useReplyCommentStore((store) => store.replyId)
   const setReplyId = useReplyCommentStore((store) => store.setReplyId)
@@ -107,7 +104,7 @@ const ReplyItem = (props: ReplyItemProps) => {
 
   useEffect(() => {
     form.setFocus("content")
-  }, [form.setFocus])
+  }, [form])
 
   const handleReset = async function () {
     clearSelectedReply()
@@ -118,7 +115,7 @@ const ReplyItem = (props: ReplyItemProps) => {
     if (replyId && selectedReply) {
       form.setValue("content", selectedReply.content)
     }
-  }, [replyId, form.setValue, selectedReply])
+  }, [replyId, form, selectedReply])
 
   const handleOnSubmit = async function (data: z.infer<typeof editSchema>) {
     // updateCommentMutation.mutate({
