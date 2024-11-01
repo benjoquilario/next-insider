@@ -1,6 +1,6 @@
 "use client"
 
-import React from "react"
+import React, { use } from "react";
 import { cn } from "@/lib/utils"
 import ProfilePhoto from "@/components/profile/profile-photo"
 import CoverPhoto from "@/components/profile/cover-photo"
@@ -13,7 +13,8 @@ import type { User } from "@prisma/client"
 import Link from "next/link"
 import { useFolloMutation } from "@/hooks/useFollowMutation"
 
-const ProfilePage = ({ params }: { params: { userId: string } }) => {
+const ProfilePage = (props: { params: Promise<{ userId: string }> }) => {
+  const params = use(props.params);
   const userId = params.userId
   const { data: session } = useSession()
 

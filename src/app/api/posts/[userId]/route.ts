@@ -2,10 +2,8 @@ import db from "@/lib/db"
 import { auth } from "@/auth"
 import { type NextRequest, NextResponse } from "next/server"
 
-export async function GET(
-  req: NextRequest,
-  { params }: { params: { userId: string } }
-) {
+export async function GET(req: NextRequest, props: { params: Promise<{ userId: string }> }) {
+  const params = await props.params;
   const userId = params.userId
   const searchParams = req.nextUrl.searchParams
   const limit = searchParams.get("limit")

@@ -4,7 +4,8 @@ import Image from "next/image"
 import Link from "next/link"
 import { MdPersonAddDisabled } from "react-icons/md"
 
-const FollowingPage = async ({ params }: { params: { userId: string } }) => {
+const FollowingPage = async (props: { params: Promise<{ userId: string }> }) => {
+  const params = await props.params;
   const userId = params.userId
 
   const following = await getFollowingFromUserId({ userId })

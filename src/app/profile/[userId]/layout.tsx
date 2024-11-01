@@ -7,18 +7,19 @@ import { capitalizeName } from "@/lib/utils"
 
 interface ProfileLayoutProps {
   children: React.ReactNode
-  params: {
+  params: Promise<{
     userId: string
-  }
+  }>
 }
 
-export async function generateMetadata({
-  params,
-}: {
-  params: {
-    userId: string
+export async function generateMetadata(
+  props: {
+    params: Promise<{
+      userId: string
+    }>
   }
-}): Promise<Metadata | undefined> {
+): Promise<Metadata | undefined> {
+  const params = await props.params;
   const userId = params.userId
 
   const profile = await getUserById({ userId })

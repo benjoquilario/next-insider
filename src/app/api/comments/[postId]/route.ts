@@ -2,10 +2,8 @@ import db from "@/lib/db"
 import { auth } from "@/auth"
 import { type NextRequest, NextResponse } from "next/server"
 
-export async function GET(
-  req: NextRequest,
-  { params }: { params: { postId: string } }
-) {
+export async function GET(req: NextRequest, props: { params: Promise<{ postId: string }> }) {
+  const params = await props.params;
   const postId = params.postId
 
   const searchParams = req.nextUrl.searchParams

@@ -14,7 +14,6 @@ type CreateButtonProps = {
 }
 
 const CreateButton = (props: CreateButtonProps) => {
-  const { userId } = props
   const setIsPostOpen = usePostStore((store) => store.setIsPostOpen)
   const { data: currentUser, isPending } = useQueryUser()
 
@@ -54,7 +53,7 @@ const CreateButton = (props: CreateButtonProps) => {
           </span>
         </Button>
       </div>
-      <CreatePost userId={userId} />
+      {/* <CreatePost userId={userId} /> */}
     </React.Fragment>
   )
 }
