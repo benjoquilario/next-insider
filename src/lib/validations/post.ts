@@ -1,11 +1,12 @@
 import * as z from "zod"
 import { createInsertSchema, createSelectSchema } from "drizzle-zod"
-import { posts, postImages } from "@/database/schema/post"
+import { posts, postImages } from "@/db/schema/post"
+import { users } from "@/db/schema"
+import { type User } from "./user"
 
 export const insertPostSchema = createInsertSchema(posts, {
   content: (schema) => schema.content.trim().min(3).max(255),
-  authorId: (schema) => schema.authorId.uuid().nullable(),
-})
+}).omit({ id: true, createdAt: true, authorId: true })
 
 export const selectPostSchema = createSelectSchema(posts)
 
@@ -22,3 +23,8 @@ export type Post = z.infer<typeof selectPostSchema>
 export type NewPost = z.infer<typeof insertPostSchema>
 export type PostImage = z.infer<typeof selectPostImageSchema>
 export type NewPostImage = z.infer<typeof insertPostImageSchema>
+export type CreateNewPost = NewPost & { images: NewPostImage[] }
+export type PostData = Post & {
+  images: PostImage[]
+  author: User
+}

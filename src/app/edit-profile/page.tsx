@@ -1,6 +1,6 @@
 "use client"
 
-import { useQueryUser } from "@/hooks/queries/useQueryUser"
+import { useQueryUser } from "@/hooks/queries/use-query-user"
 import React, { useMemo, useEffect } from "react"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"

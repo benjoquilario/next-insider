@@ -16,6 +16,7 @@
     "db:studio": "drizzle-kit studio"
   },
   "dependencies": {
+    "@auth/drizzle-adapter": "^1.7.2",
     "@auth/prisma-adapter": "^2.2.0",
     "@hookform/resolvers": "^3.6.0",
     "@prisma/client": "^5.15.0",
@@ -34,10 +35,10 @@
     "@radix-ui/react-toggle": "^1.0.3",
     "@radix-ui/react-tooltip": "^1.1.2",
     "@t3-oss/env-nextjs": "^0.10.1",
-    "@tanstack/react-query": "^5.45.0",
+    "@tanstack/react-query": "^5.59.16",
     "@tanstack/react-query-devtools": "^5.45.0",
     "@types/bcrypt": "^5.0.2",
-    "@uploadthing/react": "^6.6.0",
+    "@uploadthing/react": "^7.1.0",
     "bcrypt": "^5.1.1",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
@@ -50,7 +51,7 @@
     "holy-loader": "^2.3.1",
     "lodash.chunk": "^4.2.0",
     "next": "15.0.2",
-    "next-auth": "^5.0.0-beta.19",
+    "next-auth": "5.0.0-beta.25",
     "next-themes": "^0.3.0",
     "nextjs-toploader": "^1.6.12",
     "postgres": "^3.4.5",
@@ -67,7 +68,7 @@
     "sonner": "^1.4.41",
     "tailwind-merge": "^2.3.0",
     "tailwindcss-animate": "^1.0.7",
-    "uploadthing": "^6.12.0",
+    "uploadthing": "^7.2.0",
     "zod": "^3.23.8",
     "zustand": "^4.5.2"
   },

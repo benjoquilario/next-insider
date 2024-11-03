@@ -1,9 +1,11 @@
 import NextAuth, { DefaultSession } from "next-auth"
 import { authConfig } from "./auth.config"
 import Credentials from "next-auth/providers/credentials"
-import db from "@/lib/db"
+import { db } from "@/db"
 import bcrypt from "bcrypt"
-import { PrismaAdapter } from "@auth/prisma-adapter"
+import { DrizzleAdapter } from "@auth/drizzle-adapter"
+import { users, accounts, sessions, verificationTokens } from "@/db/schema/auth"
+import { eq } from "drizzle-orm"
 import { credentialsValidator } from "@/lib/validations/credentials"
 
 declare module "next-auth" {
@@ -16,7 +18,12 @@ declare module "next-auth" {
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   ...authConfig,
-  adapter: PrismaAdapter(db),
+  adapter: DrizzleAdapter(db, {
+    usersTable: users,
+    accountsTable: accounts,
+    sessionsTable: sessions,
+    verificationTokensTable: verificationTokens,
+  }),
   providers: [
     Credentials({
       name: "credentials",
@@ -32,10 +39,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 
           if (!email || !password) return null
 
-          const user = await db.user.findUnique({
-            where: {
-              email: email,
-            },
+          const user = await db.query.users.findFirst({
+            where: eq(users.email, email),
           })
 
           if (!user || !user?.password) return null

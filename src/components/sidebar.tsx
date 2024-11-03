@@ -6,7 +6,7 @@ import { FaRegCircle } from "react-icons/fa"
 import React from "react"
 import Nav from "./nav"
 import { SignOut } from "./sign-out"
-import { useQueryUser } from "@/hooks/queries/useQueryUser"
+import { useQueryUser } from "@/hooks/queries/use-query-user"
 import { type User } from "@prisma/client"
 import { useSession } from "next-auth/react"
 

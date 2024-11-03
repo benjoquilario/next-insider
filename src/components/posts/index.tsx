@@ -7,13 +7,14 @@ import { QUERY_KEYS } from "@/lib/queriesKey"
 import PostSkeleton from "@/components/skeleton/post-skeleton"
 import { InView } from "react-intersection-observer"
 import { motion, AnimatePresence } from "framer-motion"
-import type { User } from "@prisma/client"
 import { useSession } from "next-auth/react"
+import { getPosts } from "@/db/queries/post"
 
 const Posts = () => {
   const queryClient = useQueryClient()
-
   const { data: session } = useSession()
+
+  const queryKey = [QUERY_KEYS.GET_INFINITE_POSTS]
 
   const {
     data: posts,
@@ -22,13 +23,11 @@ const Posts = () => {
     hasNextPage,
     isFetchingNextPage,
   } = useInfiniteQuery({
-    queryKey: [QUERY_KEYS.GET_INFINITE_POSTS],
+    queryKey,
     queryFn: async ({ pageParam }) => {
-      const response = await fetch(`/api/posts?limit=${3}&cursor=${pageParam}`)
+      const data = await getPosts(5, pageParam)
 
-      const data = await response.json()
-
-      data.posts.map((post: any) => {
+      data.data.map((post) => {
         queryClient.setQueryData(["posts", post.id], post)
       })
 
@@ -36,7 +35,7 @@ const Posts = () => {
     },
 
     initialPageParam: 0,
-    getNextPageParam: (lastPage) => lastPage.nextSkip,
+    getNextPageParam: (lastPage) => lastPage.nextOffset,
     refetchOnWindowFocus: false,
   })
 
@@ -46,17 +45,18 @@ const Posts = () => {
         {isPending
           ? Array.from(Array(2), (_, i) => <PostSkeleton key={i} />)
           : posts?.pages.map((page) =>
-              page?.posts.map((post: IPost<User>) => (
+              page?.data.map((post) => (
                 <motion.li
                   key={post.id}
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
-                  className="relative z-10 flex flex-col gap-1 overflow-hidden rounded-md border shadow"
+
+                  // className="relative z-10 flex flex-col gap-1 overflow-hidden rounded-md border shadow"
                 >
                   <PostItem
                     key={post.id}
-                    isUserPost={post.user.id === session?.user.id}
+                    isUserPost={post.author.id === session?.user.id}
                     post={post}
                   />
                 </motion.li>

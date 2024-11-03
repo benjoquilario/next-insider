@@ -10,7 +10,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     <main className="mx-auto flex w-full flex-col">
       {children}
 
-      <MobileNav />
+      {/* <MobileNav /> */}
     </main>
   )
 }

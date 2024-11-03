@@ -3,6 +3,12 @@ interface IPostValues {
   selectedFile: File[]
 }
 
+interface InfinitePage<T> {
+  data: T
+  hasNextPage: boolean
+  nextOffset: number
+}
+
 interface ISelectedFile {
   url: string
   postId?: string
@@ -61,12 +67,6 @@ interface LikePost<T> {
   id: string
   postId: string
   user: T
-}
-
-interface IPage<T> {
-  posts: T
-  hasNextPage: boolean
-  nextSkip: number
 }
 
 interface ICommentPage<T> {

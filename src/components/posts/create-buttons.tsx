@@ -6,8 +6,8 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import usePostStore from "@/store/post"
-import CreatePost from "./create-post"
-import { useQueryUser } from "@/hooks/queries/useQueryUser"
+import CreatePost from "./post-15/create-post"
+import { useQueryUser } from "@/hooks/queries/use-query-user"
 
 type CreateButtonProps = {
   userId?: string
@@ -15,12 +15,12 @@ type CreateButtonProps = {
 
 const CreateButton = (props: CreateButtonProps) => {
   const setIsPostOpen = usePostStore((store) => store.setIsPostOpen)
-  const { data: currentUser, isPending } = useQueryUser()
+  // const { data: currentUser, isPending } = useQueryUser()
 
   return (
     <React.Fragment>
       <div className="relative my-2 flex h-20 items-center justify-start gap-2 overflow-hidden rounded border p-2 shadow">
-        <div className="min-h-6 w-12 max-w-20">
+        {/* <div className="min-h-6 w-12 max-w-20">
           {isPending ? (
             <div className="size-10 rounded-full bg-primary/10"></div>
           ) : (
@@ -39,21 +39,22 @@ const CreateButton = (props: CreateButtonProps) => {
               </Avatar>
             </Link>
           )}
-        </div>
+        </div> */}
         <Button
           onClick={() => setIsPostOpen(true)}
           variant="secondary"
-          disabled={isPending}
+          // disabled={isPending}
           aria-label="create a post"
           className="w-full justify-start rounded-full"
           size="lg"
         >
           <span className="ml-2 text-xs md:text-sm">
-            What&apos;s on your mind, {currentUser?.name?.split(" ")[0]}
+            What&apos;s on your mind
+            {/* What&apos;s on your mind, {currentUser?.name?.split(" ")[0]} */}
           </span>
         </Button>
       </div>
-      {/* <CreatePost userId={userId} /> */}
+      <CreatePost />
     </React.Fragment>
   )
 }

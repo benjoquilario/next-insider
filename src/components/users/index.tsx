@@ -6,7 +6,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import UserItem from "./user-item"
 import { cn } from "@/lib/utils"
-import { useQueryUser } from "@/hooks/queries/useQueryUser"
+import { useQueryUser } from "@/hooks/queries/use-query-user"
 import { useInfiniteQuery } from "@tanstack/react-query"
 import { User } from "@prisma/client"
 

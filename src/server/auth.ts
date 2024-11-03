@@ -1,6 +1,6 @@
 "use server"
 
-import db from "@/lib/db"
+import { db } from "@/db"
 import bcrypt from "bcrypt"
 import { signIn } from "@/auth"
 import {
@@ -10,7 +10,8 @@ import {
   registerValidator,
 } from "@/lib/validations/credentials"
 import { AuthError } from "next-auth"
-import { redirect } from "next/navigation"
+import { users } from "@/db/schema"
+import { eq } from "drizzle-orm"
 
 export async function login(values: ICredentials) {
   const validatedFields = credentialsValidator.safeParse(values)
@@ -64,8 +65,8 @@ export async function register(values: IRegister) {
   const { firstName, lastName, email, password, confirmPassword } =
     validatedFields.data
 
-  const isEmailExist = await db.user.findFirst({
-    where: { email },
+  const isEmailExist = await db.query.users.findFirst({
+    where: eq(users.email, email),
   })
 
   if (isEmailExist) {
@@ -83,14 +84,11 @@ export async function register(values: IRegister) {
     }
   }
 
-  await db.user.create({
-    data: {
-      email,
-      password: hashedPassword,
-      name: `${firstName} ${lastName}`,
-      image: `/avatar-${randomNumber}.png`,
-      username: `${firstName.toLowerCase()}${lastName.toLowerCase()}`,
-    },
+  await db.insert(users).values({
+    email,
+    password: hashedPassword,
+    name: `${firstName} ${lastName}`,
+    image: `/avatar-${randomNumber}.png`,
   })
 
   return {

@@ -3,15 +3,10 @@
 import { auth } from "@/auth"
 // import db from "@/lib/db"
 import { UTApi } from "uploadthing/server"
-import { db } from "@/database"
-import { postImages, posts } from "@/database/schema/post"
+import { db } from "@/db"
+import { postImages, posts } from "@/db/schema/post"
 import { desc } from "drizzle-orm"
-import {
-  insertPostSchema,
-  NewPostImage,
-  Post,
-  NewPost,
-} from "@/lib/validations/post"
+import { insertPostSchema, type CreateNewPost } from "@/lib/validations/post"
 import { revalidatePath } from "next/cache"
 
 // export const createPost = async (values: ICreatePost) => {
@@ -173,6 +168,7 @@ export const getPosts = async (limit = 5, skip = 0) => {
   const getPosts = await db.query.posts.findMany({
     with: {
       images: true,
+      author: true,
     },
     limit: Number(limit) || 5,
     offset: Number(skip) || 0,
@@ -181,14 +177,14 @@ export const getPosts = async (limit = 5, skip = 0) => {
 
   if (getPosts.length === 0) {
     return {
-      posts: [],
+      data: [],
       hasNextPage: false,
       nextOffset: null,
     }
   }
 
   return {
-    posts: getPosts,
+    data: getPosts,
     hasNextPage: getPosts.length < (Number(limit) || 5) ? false : true,
     nextOffset:
       getPosts.length < (Number(limit) || 5)
@@ -197,9 +193,7 @@ export const getPosts = async (limit = 5, skip = 0) => {
   }
 }
 
-type CreatePost = NewPost & { images: NewPostImage[] }
-
-export const createPost = async (data: CreatePost) => {
+export const createPost = async (data: CreateNewPost) => {
   const validatedFields = insertPostSchema.safeParse(data)
 
   if (!validatedFields.success) {
@@ -225,9 +219,14 @@ export const createPost = async (data: CreatePost) => {
       .returning()
 
     if (data.images.length > 0 && newPost) {
-      await db
-        .insert(postImages)
-        .values(data.images.map((image) => ({ ...image, postId: newPost.id })))
+      const newPostImage = data.images.map((image) => ({
+        postId: newPost.id,
+        imageUrl: image.imageUrl,
+        fileName: image.fileName,
+        fileKey: image.fileKey,
+      }))
+
+      await db.insert(postImages).values(newPostImage)
     }
 
     revalidatePath("/")

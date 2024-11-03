@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query"
 import { useSession } from "next-auth/react"
-import { getCurrentUser } from "@/lib/metrics"
+import { sessionAuth } from "@/db/queries/user"
 
 export function useQueryUser() {
   const { data: session } = useSession()
@@ -9,6 +9,6 @@ export function useQueryUser() {
 
   return useQuery({
     queryKey: ["users", userId],
-    queryFn: () => getCurrentUser(),
+    queryFn: () => sessionAuth(),
   })
 }

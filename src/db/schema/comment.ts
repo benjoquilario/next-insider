@@ -21,3 +21,10 @@ export const commentRelations = relations(comments, ({ one }) => ({
     references: [posts.id],
   }),
 }))
+
+export const usersRelations = relations(comments, ({ one }) => ({
+  author: one(users, {
+    fields: [comments.authorId],
+    references: [users.id],
+  }),
+}))

@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query"
 import { getUserById } from "@/lib/metrics"
 
-export function useQueryUserById(userId: string) {
+export function useQueryUserId(userId: string) {
   return useQuery({
     queryKey: ["user", userId],
     queryFn: () => getUserById({ userId }),

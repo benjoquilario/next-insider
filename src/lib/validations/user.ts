@@ -1,5 +1,11 @@
 import { z } from "zod"
 import { sub } from "date-fns"
+import { users } from "@/db/schema"
+import { createSelectSchema } from "drizzle-zod"
+
+export const userSelectSchema = createSelectSchema(users)
+
+export type User = z.infer<typeof userSelectSchema>
 
 const nonEmptyString = z
   .string()

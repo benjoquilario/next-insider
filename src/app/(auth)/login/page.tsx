@@ -27,7 +27,6 @@ import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import Link from "next/link"
 import { Input } from "@/components/ui/input"
-import { useRouter } from "next/navigation"
 import { useState, useTransition } from "react"
 import { login } from "@/server/auth"
 

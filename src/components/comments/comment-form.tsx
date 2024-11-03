@@ -18,7 +18,7 @@ import { useForm } from "react-hook-form"
 import * as z from "zod"
 import { useCreateCommentMutation } from "@/hooks/useCreateComment"
 import Link from "next/link"
-import { useQueryUser } from "@/hooks/queries/useQueryUser"
+import { useQueryUser } from "@/hooks/queries/use-query-user"
 
 const commentSchema = z.object({
   comment: z

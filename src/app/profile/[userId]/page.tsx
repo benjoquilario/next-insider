@@ -1,12 +1,12 @@
 "use client"
 
-import React, { use } from "react";
+import React, { use } from "react"
 import { cn } from "@/lib/utils"
 import ProfilePhoto from "@/components/profile/profile-photo"
 import CoverPhoto from "@/components/profile/cover-photo"
 import ProfileSkeleton from "@/components/skeleton/profile-skeleton"
 import TabsProfile from "@/components/profile/tabs"
-import { useQueryUserById } from "@/hooks/queries/useQueryUserById"
+import { useQueryUserById } from "@/hooks/queries/use-query-user-id"
 import { useSession } from "next-auth/react"
 import { Button, buttonVariants } from "@/components/ui/button"
 import type { User } from "@prisma/client"
@@ -14,7 +14,7 @@ import Link from "next/link"
 import { useFolloMutation } from "@/hooks/useFollowMutation"
 
 const ProfilePage = (props: { params: Promise<{ userId: string }> }) => {
-  const params = use(props.params);
+  const params = use(props.params)
   const userId = params.userId
   const { data: session } = useSession()
 
