@@ -6,7 +6,13 @@ import { toast } from "sonner"
 import { uploadFiles } from "@/lib/uploadthing"
 import { updateProfilePicture } from "@/server/user"
 
-const ProfilePhoto = ({ image }: { image: string }) => {
+const ProfilePhoto = ({
+  image,
+  isProfileOwner,
+}: {
+  image: string
+  isProfileOwner: boolean
+}) => {
   async function onUpload(files: File[]) {
     try {
       const res = await uploadFiles("coverPhoto", {
@@ -30,12 +36,14 @@ const ProfilePhoto = ({ image }: { image: string }) => {
           <div className="size-full animate-pulse"></div>
         </AvatarFallback>
       </Avatar>
-      <PhotoUploader
-        onUpload={onUpload}
-        maxFileCount={4}
-        maxSize={4 * 1024 * 1024}
-        className="absolute bottom-3 right-3 flex size-8 items-center justify-center gap-1 rounded-full px-1 text-foreground md:rounded-md"
-      />
+      {isProfileOwner ? (
+        <PhotoUploader
+          onUpload={onUpload}
+          maxFileCount={4}
+          maxSize={4 * 1024 * 1024}
+          className="absolute bottom-3 right-3 flex size-8 items-center justify-center gap-1 rounded-full px-1 text-foreground md:rounded-md"
+        />
+      ) : null}
     </div>
   )
 }

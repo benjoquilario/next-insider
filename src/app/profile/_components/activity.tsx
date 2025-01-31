@@ -56,8 +56,8 @@ const ActivityUser = (props: ActivityUserProps) => {
               </li>
             ))
           : activies?.pages.map((page) =>
-              page?.activities.length !== 0 ? (
-                page?.activities.map((activity: IActivity<User>) => (
+              page?.data.length !== 0 ? (
+                page?.data.map((activity: IActivity<User>) => (
                   <motion.li
                     key={activity.id}
                     initial={{ opacity: 0 }}

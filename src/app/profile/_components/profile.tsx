@@ -25,11 +25,11 @@ const Profile = ({
 
   return (
     <div className="mb-2 mt-0">
-      <CoverPhoto userId={userId} cover={cover ?? ""} />
+      <CoverPhoto isProfileOwner={isProfileOwner} cover={cover ?? ""} />
       <div className="space-y-4">
         <div className="flex flex-col justify-center shadow md:flex-row md:justify-between">
           <div className="flex flex-col items-center justify-center gap-3 px-5 py-2 md:flex-row md:pb-5">
-            <ProfilePhoto image={image ?? ""} />
+            <ProfilePhoto isProfileOwner={isProfileOwner} image={image ?? ""} />
             <div className="text-center sm:text-left">
               <div>
                 <h1 className="text-lg font-semibold capitalize text-foreground">
