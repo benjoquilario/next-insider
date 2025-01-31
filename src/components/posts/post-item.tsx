@@ -85,7 +85,10 @@ const PostItem = React.memo(
             )}
           >
             <Avatar>
-              <AvatarImage src={"/default-image.png"} alt={""} />
+              <AvatarImage
+                src={post.user.image ?? "/default-image.png"}
+                alt={""}
+              />
               <AvatarFallback>
                 <div className="size-full animate-pulse"></div>
               </AvatarFallback>

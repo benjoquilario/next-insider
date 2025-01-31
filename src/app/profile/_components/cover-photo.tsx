@@ -6,7 +6,13 @@ import { toast } from "sonner"
 import { uploadFiles } from "@/lib/uploadthing"
 import { updateCoverPicture } from "@/server/user"
 
-const CoverPhoto = ({ cover }: { cover: string; userId: string }) => {
+const CoverPhoto = ({
+  cover,
+  isProfileOwner,
+}: {
+  cover: string
+  isProfileOwner: boolean
+}) => {
   async function onUpload(files: File[]) {
     try {
       const res = await uploadFiles("coverPhoto", {
@@ -33,13 +39,15 @@ const CoverPhoto = ({ cover }: { cover: string; userId: string }) => {
             className="object-cover"
           />
         </div>
-        <PhotoUploader
-          onUpload={onUpload}
-          maxFileCount={4}
-          maxSize={4 * 1024 * 1024}
-          isCover
-          className="absolute bottom-3 right-3 flex size-8 items-center justify-center gap-1 rounded-full px-1 text-foreground md:w-32 md:rounded-md"
-        />
+        {isProfileOwner ? (
+          <PhotoUploader
+            onUpload={onUpload}
+            maxFileCount={4}
+            maxSize={4 * 1024 * 1024}
+            isCover
+            className="absolute bottom-3 right-3 flex size-8 items-center justify-center gap-1 rounded-full px-1 text-foreground md:w-32 md:rounded-md"
+          />
+        ) : null}
       </div>
     </div>
   )
