@@ -12,7 +12,8 @@
     "shadcn": "pnpm dlx shadcn@latest",
     "db:migrate": "pnpm dlx prisma migrate dev --name",
     "db:studio": "pnpm dlx prisma studio",
-    "db:generate": "pnpm dlx prisma generate"
+    "db:generate": "pnpm dlx prisma generate",
+    "postinstall": "prisma generate"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.1",
