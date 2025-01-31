@@ -5,7 +5,7 @@ export async function GET(
   req: NextRequest,
   { params }: { params: Promise<{ userId: string }> }
 ) {
-  const userId = (await params).userId
+  const { userId } = await params
 
   const searchParams = req.nextUrl.searchParams
   const limit = searchParams.get("limit")
