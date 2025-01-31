@@ -1,14 +1,14 @@
-import db from '@/lib/db';
-import { getUser } from '@/lib/queries';
-import { type NextRequest, NextResponse } from 'next/server';
+import db from "@/lib/db"
+import { getUser } from "@/lib/user"
+import { type NextRequest, NextResponse } from "next/server"
 
 export async function GET(req: NextRequest) {
-  const searchParams = req.nextUrl.searchParams;
-  const limit = searchParams.get('limit');
-  const skip = searchParams.get('cursor');
-  const session = await getUser();
+  const searchParams = req.nextUrl.searchParams
+  const limit = searchParams.get("limit")
+  const skip = searchParams.get("cursor")
+  const session = await getUser()
 
-  const userId = session?.id;
+  const userId = session?.id
 
   const posts = await db.post.findMany({
     include: {
@@ -41,21 +41,21 @@ export async function GET(req: NextRequest) {
       },
       selectedFile: true,
     },
-    orderBy: { createdAt: 'desc' },
+    orderBy: { createdAt: "desc" },
     take: Number(limit) || 5,
     skip: Number(skip) || 0,
-  });
+  })
 
   if (posts.length === 0) {
     return NextResponse.json({
-      comments: [],
+      data: [],
       hasNextPage: false,
       nextSkip: null,
-    });
+    })
   }
 
-  const transformedPosts = posts.map(post => {
-    const { _count, likePost, user, ...rest } = post;
+  const transformedPosts = posts.map((post) => {
+    const { _count, likePost, user, ...rest } = post
     return {
       ...rest,
       _count,
@@ -63,15 +63,16 @@ export async function GET(req: NextRequest) {
       user,
       isFollowing: user.followers.length === 1,
       isLiked: session ? likePost.length > 0 : false,
-    };
-  });
+      isUserPost: user.id === userId ? true : false,
+    }
+  })
 
   return NextResponse.json({
-    posts: transformedPosts,
+    data: transformedPosts,
     hasNextPage: posts.length < (Number(limit) || 5) ? false : true,
     nextSkip:
       posts.length < (Number(limit) || 5)
         ? null
         : Number(skip) + (Number(limit) as number),
-  });
+  })
 }
