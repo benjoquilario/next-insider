@@ -1,14 +1,14 @@
 import db from "@/lib/db"
-import { auth } from "@/auth"
+import { getUser } from "@/lib/user"
 import { type NextRequest, NextResponse } from "next/server"
 
 export async function GET(req: NextRequest) {
   const searchParams = req.nextUrl.searchParams
   const limit = searchParams.get("limit")
   const skip = searchParams.get("cursor")
-  const session = await auth()
+  const session = await getUser()
 
-  console.log(session?.user)
+  const userId = session?.id
 
   const posts = await db.post.findMany({
     include: {
@@ -20,7 +20,7 @@ export async function GET(req: NextRequest) {
           email: true,
           followers: {
             where: {
-              followerId: session?.user.id!,
+              followerId: userId!,
             },
           },
         },
@@ -30,7 +30,7 @@ export async function GET(req: NextRequest) {
           id: true,
         },
         where: {
-          userId: session?.user.id,
+          userId: userId!,
         },
       },
       _count: {
@@ -46,12 +46,9 @@ export async function GET(req: NextRequest) {
     skip: Number(skip) || 0,
   })
 
-  const nextId =
-    posts.length < Number(limit) ? undefined : posts[Number(limit) - 1].id
-
   if (posts.length === 0) {
     return NextResponse.json({
-      comments: [],
+      data: [],
       hasNextPage: false,
       nextSkip: null,
     })
@@ -66,11 +63,12 @@ export async function GET(req: NextRequest) {
       user,
       isFollowing: user.followers.length === 1,
       isLiked: session ? likePost.length > 0 : false,
+      isUserPost: user.id === userId ? true : false,
     }
   })
 
   return NextResponse.json({
-    posts: transformedPosts,
+    data: transformedPosts,
     hasNextPage: posts.length < (Number(limit) || 5) ? false : true,
     nextSkip:
       posts.length < (Number(limit) || 5)

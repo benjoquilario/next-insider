@@ -1,19 +1,14 @@
 "use client"
 
-import React, { useCallback, useEffect, useState } from "react"
+import React, { useEffect, useState } from "react"
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogClose,
+  DialogDescription,
 } from "@/components/ui/dialog"
-import { Button } from "@/components/ui/button"
-import { cn } from "@/lib/utils"
-import TextareaAutoSize from "react-textarea-autosize"
-import usePostStore from "@/store/post"
-import { FaPhotoVideo } from "react-icons/fa"
-
 import {
   Form,
   FormControl,
@@ -22,139 +17,164 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form"
-import { usePostUpload } from "@/hooks/usePostUpload"
-import PostUpload from "./post-upload"
-import { useUpdateDeleteMutation } from "@/hooks/useUpdateDeletePost"
-import { useCreatePostMutation } from "@/hooks/useCreatePostMutation"
-import { Cross2Icon } from "@radix-ui/react-icons"
 import { toast } from "sonner"
+import usePostStore from "@/store/post"
+import { useForm } from "react-hook-form"
+import { type PostData } from "@/types"
+import { FileUploader } from "@/components/file-uploader"
+import { useUploadThing } from "@/lib/uploadthing"
+import { getErrorMessage } from "@/lib/handle-error"
+import { useCreatePostMutation } from "@/hooks/mutation/posts/use-create-post"
+import { useUpdateMutation } from "@/hooks/mutation/posts/use-update-post"
+import { FileSelectedCard } from "@/components/file-uploader"
+import { Button } from "@/components/ui/button"
+import { ISelectedFile } from "@/types"
+import { X } from "lucide-react"
 
-type CreatePostFormProps = {
+interface CreatePostProps {
+  content: string
+  selectedFile: ISelectedFile[]
   userId?: string
 }
 
-const CreatePostForm = (props: CreatePostFormProps) => {
-  const { userId } = props
-  const {
-    getRootProps,
-    getInputProps,
-    form,
-    startUpload,
-    isUploading,
-    isError,
-    setIsError,
-  } = usePostUpload()
+const CreatePost = ({ content, selectedFile }: CreatePostProps) => {
+  const isPostOpen = usePostStore((state) => state.isPostOpen)
+  const setIsPostOpen = usePostStore((state) => state.setIsPostOpen)
+  const [isError, setIsError] = useState(false)
+  const isUpdating = usePostStore((state) => state.isUpdating)
+  const setIsUpdating = usePostStore((state) => state.setIsUpdating)
+  const deletedKeys = usePostStore((state) => state.deletedKeys)
+  const deletedFiles = usePostStore((state) => state.deletedFiles)
+  const clearDeletedKeys = usePostStore((state) => state.clearDeletedKeys)
+  const clearDeletedFiles = usePostStore((state) => state.clearDeletedFiles)
+  const clearSelectedPost = usePostStore((state) => state.clearSelectedPost)
+  const setDeletedFiles = usePostStore((state) => state.setDeletedFiles)
+  const setDeletedKeys = usePostStore((state) => state.setDeletedKeys)
+  const postId = usePostStore((state) => state.selectedPost.postId)
 
-  const [isPostOpen, setIsPostOpen] = usePostStore((store) => [
-    store.isPostOpen,
-    store.setIsPostOpen,
-  ])
+  const form = useForm<PostData>({
+    defaultValues: {
+      content: "",
+      selectedFile: [],
+    },
+  })
 
-  const [selectedPostId, setSelectedPostId] = usePostStore((store) => [
-    store.selectedPostId,
-    store.setSelectedPostId,
-  ])
-  const isEditing = usePostStore((store) => store.isEditing)
-  const setIsEditing = usePostStore((store) => store.setIsEditing)
-  const [clearDeletedKeys, clearDeletedFiles] = usePostStore((store) => [
-    store.clearDeletedKeys,
-    store.clearDeletedFiles,
-  ])
+  const [fileState, setFileState] =
+    React.useState<ISelectedFile[]>(selectedFile)
 
-  const handleOnReset = useCallback(() => {
-    form.reset()
-    setIsEditing(false)
-    setSelectedPostId("")
-    clearDeletedKeys()
-    clearDeletedFiles()
-    clearSelectedPost()
-    setIsPostOpen(false)
-    setIsError(false)
+  console.log(content)
+
+  const { writePostMutation } = useCreatePostMutation()
+  const { updatePostMutation } = useUpdateMutation()
+  const { startUpload, isUploading } = useUploadThing("imageUploader", {
+    onClientUploadComplete: () => {
+      console.log("Success")
+    },
+    onUploadError: (e) => {
+      setIsError(true)
+      toast.error(e.message)
+    },
+  })
+
+  console.log(fileState)
+
+  const handleOnRemove = React.useCallback(
+    (id: string, key: string) => {
+      if (!fileState) return
+      const newFiles = fileState.filter((file) => file.id !== id)
+      setFileState(newFiles)
+
+      setDeletedFiles(id)
+      setDeletedKeys(key)
+    },
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
-
-  const { updatePostMutation, deletePostMutation } = useUpdateDeleteMutation(
-    userId,
-    handleOnReset
+    [fileState]
   )
-  const { createPostMutation } = useCreatePostMutation(handleOnReset, userId)
-  const selectedPost = usePostStore((store) => store.selectedPost)
-  const clearSelectedPost = usePostStore((store) => store.clearSelectedPost)
-
-  const [deletedFiles, deletedKeys] = usePostStore((store) => [
-    store.deletedFiles,
-    store.deletedKeys,
-  ])
 
   useEffect(() => {
-    form.setFocus("content")
-  }, [form])
-
-  useEffect(() => {
-    if (selectedPostId && selectedPost) {
-      form.setValue("content", selectedPost.content)
+    if (isUpdating) {
+      form.setValue("content", content)
     }
-  }, [selectedPostId, form, selectedPost])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [form, postId, isUpdating])
 
-  const handleOnSubmit = async function (values: IPostValues) {
+  const reset = () => {
+    form.reset()
+    setIsUpdating(false)
+    setIsPostOpen(false)
+    clearSelectedPost()
+    clearDeletedFiles()
+    clearDeletedKeys()
+  }
+
+  const submit = function (formData: PostData) {
     if (isError) return
 
     toast.promise(
-      startUpload(values.selectedFile ?? []).then((data) => {
-        if (isEditing && selectedPostId) {
+      startUpload(formData.selectedFile ?? []).then((data) => {
+        if (isUpdating) {
           updatePostMutation.mutate({
-            content: values.content,
+            postId: postId,
+            content: formData.content,
             selectedFile: data
-              ? data?.map((image) => ({
-                  url: image.url,
-                  key: image.key,
-                }))
-              : null,
-            postId: selectedPostId,
-            fileIds: deletedFiles,
+              ? data?.map((file) => {
+                  return {
+                    url: file.url,
+                    name: file.name,
+                    type: file.type,
+                    key: file.key,
+                  }
+                })
+              : [],
             deletedKeys,
+            fileIds: deletedFiles,
           })
-        } else {
-          createPostMutation.mutate({
-            content: values.content,
+        } else
+          writePostMutation.mutate({
+            content: formData.content,
             selectedFile: data
-              ? data?.map((image) => ({
-                  url: image.url,
-                  key: image.key,
-                }))
-              : null,
+              ? data?.map((file) => {
+                  return {
+                    url: file.url,
+                    name: file.name,
+                    type: file.type,
+                    key: file.key,
+                  }
+                })
+              : [],
           })
-        }
       }),
-      {}
+      {
+        loading: "Posting...",
+        success: () => {
+          reset()
+          return "Post successfully created"
+        },
+        error: (err) => {
+          form.reset()
+          return getErrorMessage(err)
+        },
+      }
     )
   }
 
   return (
     <Dialog open={isPostOpen} onOpenChange={setIsPostOpen}>
-      <DialogContent className="sm:max-w-[625px]">
-        <DialogHeader>
-          <DialogTitle>
-            {isEditing ? "Updating Post" : "Creating Post"}
-          </DialogTitle>
-          {/* <DialogDescription>
-            Make changes to your profile here. Click save when you're done.
-          </DialogDescription> */}
-        </DialogHeader>
-        {/* <div>{src?.map((s) => <Image src={s} alt={s} />)}</div> */}
-        <div
-          className={cn(
-            "relative border-t"
+      <DialogContent className="sm:max-w-[505px]">
+        <div className="flex flex-col">
+          <DialogHeader>
+            <DialogTitle>Creating Post</DialogTitle>
+            <DialogDescription className="sr-only">
+              Create a new post or update an existing one
+            </DialogDescription>
+          </DialogHeader>
 
-            // isImageDragged && "outline-dashed outline-blue-500"
-          )}
-          // {...getRootProps()}
-        >
           <Form {...form}>
             <form
               autoComplete="off"
               className=""
-              onSubmit={form.handleSubmit(handleOnSubmit)}
+              onSubmit={form.handleSubmit(submit)}
             >
               <FormField
                 control={form.control}
@@ -163,7 +183,7 @@ const CreatePostForm = (props: CreatePostFormProps) => {
                   <FormItem>
                     <FormLabel className="sr-only">Email</FormLabel>
                     <FormControl>
-                      <TextareaAutoSize
+                      <textarea
                         aria-label={`What's on your mind, Benjo?`}
                         className="w-full rounded-t-md bg-background px-0 py-3 text-sm text-foreground/90 focus:outline-none md:text-base"
                         placeholder={`What's on your mind, Benjo?`}
@@ -174,54 +194,67 @@ const CreatePostForm = (props: CreatePostFormProps) => {
                   </FormItem>
                 )}
               />
-              <div className="flex flex-col gap-2">
-                <PostUpload
-                  control={form.control}
-                  setValue={form.setValue}
-                  selectedFile={selectedPost.selectedFile}
-                >
-                  <div
-                    {...getRootProps()}
-                    className="flex cursor-pointer items-center border p-2"
-                  >
-                    <input {...getInputProps()} />
-                    <div></div>
-                    Upload Photo :
-                    <FaPhotoVideo className="ml-3 h-8 w-9" />
-                  </div>
-                </PostUpload>
-              </div>
 
-              <div className="flex items-center justify-center">
-                <Button
-                  disabled={
-                    isUploading ||
-                    updatePostMutation.isPending ||
-                    createPostMutation.isPending
-                  }
-                  type="submit"
-                  className="my-2 flex w-full items-center justify-center rounded-md px-3 py-2 text-sm md:text-base"
-                >
-                  {isEditing ? "Update Post" : "Create Post"}
-                </Button>
-              </div>
+              <FormField
+                control={form.control}
+                name="selectedFile"
+                render={({ field }) => (
+                  <div className="space-y-6">
+                    <FormItem className="w-full">
+                      <FormLabel className="sr-only">Images</FormLabel>
+                      <FormControl>
+                        <FileUploader
+                          value={field.value}
+                          onValueChange={field.onChange}
+                          maxFileCount={4}
+                          maxSize={4 * 1024 * 1024}
+                          // pass the onUpload function here for direct upload
+                          // onUpload={uploadFiles}
+                          disabled={isUploading}
+                        >
+                          {fileState?.length
+                            ? fileState?.map((file, index) => (
+                                <FileSelectedCard
+                                  key={`${file.url}-${index}`}
+                                  name={file.id!}
+                                  file={file.url}
+                                  id={file.id!}
+                                  fileKey={file.key}
+                                  onRemove={handleOnRemove}
+                                />
+                              ))
+                            : null}
+                        </FileUploader>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  </div>
+                )}
+              />
+              <Button
+                disabled={form.formState.isSubmitSuccessful}
+                className="mt-2 w-full"
+                type="submit"
+              >
+                Post
+              </Button>
             </form>
           </Form>
+
+          <DialogClose asChild>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={reset}
+              className="absolute right-4 top-4 size-8 rounded-sm px-2 opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground"
+            >
+              <X className="size-4" />
+              <span className="sr-only">Close</span>
+            </Button>
+          </DialogClose>
         </div>
-        <DialogClose asChild>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => handleOnReset()}
-            className="absolute right-4 top-4 size-8 rounded-sm px-2 opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground"
-          >
-            <Cross2Icon className="size-4" />
-            <span className="sr-only">Close</span>
-          </Button>
-        </DialogClose>
       </DialogContent>
     </Dialog>
   )
 }
-
-export default CreatePostForm
+export default CreatePost

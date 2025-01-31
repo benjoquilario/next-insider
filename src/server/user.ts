@@ -1,60 +1,72 @@
 "use server"
 
 import db from "@/lib/db"
-import { auth } from "@/auth"
-import { getCurrentUser } from "@/lib/metrics"
-import { UserSchema, userSchema } from "@/lib/validations/user"
+import { getUser } from "@/lib/user"
+import { UserSchema } from "@/lib/validations/user"
+import { revalidatePath } from "next/cache"
+import { redirect } from "next/navigation"
+import { UTApi } from "uploadthing/server"
 
 export const updateProfilePicture = async function ({ url }: { url: string }) {
-  const session = await auth()
+  const session = await getUser()
+  const utapi = new UTApi()
 
   if (!session) return
 
   await db.user.update({
     where: {
-      id: session.user.id,
+      id: session.id,
     },
     data: {
       image: url,
     },
   })
 
-  return {
-    url,
-    status: 200,
-    ok: true,
+  const currentCover = session.image
+  const coverKey = currentCover?.split("/").pop()
+
+  if (url && coverKey && currentCover?.startsWith("https://")) {
+    await utapi.deleteFiles(coverKey)
   }
+
+  revalidatePath(`/profile/${session.id}`, "page")
 }
 
 export const updateCoverPicture = async function ({ url }: { url: string }) {
-  const session = await auth()
+  const session = await getUser()
+  const utapi = new UTApi()
 
   if (!session) return
 
+  console.log(url)
+
   await db.user.update({
     where: {
-      id: session.user.id,
+      id: session.id,
     },
     data: {
       cover: url,
     },
   })
 
-  return {
-    url,
-    status: 200,
-    ok: true,
+  const currentCover = session.cover
+  const coverKey = currentCover?.split("/").pop()
+
+  if (url && coverKey && currentCover?.startsWith("https://")) {
+    await utapi.deleteFiles(coverKey)
   }
+
+  revalidatePath(`/profile/${session.id}`, "page")
 }
 
 export const updateUserInformation = async function (data: UserSchema) {
-  const session = await auth()
+  const session = await getUser()
 
   if (!session) return
 
   await db.user.update({
     where: {
-      id: session.user.id,
+      id: session.id,
     },
     data: {
       username: data.username,
@@ -69,5 +81,6 @@ export const updateUserInformation = async function (data: UserSchema) {
     },
   })
 
-  return
+  revalidatePath("/edit-profile")
+  redirect(`/profile/${session.id}`)
 }

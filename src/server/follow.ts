@@ -1,6 +1,6 @@
 "use server"
 
-import { auth } from "@/auth"
+import { getUser } from "@/lib/user"
 import db from "@/lib/db"
 
 export const follow = async function ({
@@ -8,8 +8,8 @@ export const follow = async function ({
 }: {
   userIdToFollow: string
 }) {
-  const session = await auth()
-  const userId = session?.user.id
+  const session = await getUser()
+  const userId = session?.id
 
   if (!session) return
 
@@ -51,8 +51,8 @@ export const unFollow = async function ({
 }: {
   userIdToFollow: string
 }) {
-  const session = await auth()
-  const userId = session?.user.id
+  const session = await getUser()
+  const userId = session?.id
 
   if (!session) return
 

@@ -7,7 +7,7 @@ type LayoutProps = {
 
 const Layout: React.FC<LayoutProps> = ({ children }) => {
   return (
-    <main className="mx-auto flex w-full flex-col">
+    <main className="font-geist-sans mx-auto flex w-full flex-col">
       {children}
 
       <MobileNav />

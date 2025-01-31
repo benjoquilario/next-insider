@@ -1,100 +1,104 @@
 "use server"
 
+import * as z from "zod"
 import db from "@/lib/db"
-import bcrypt from "bcrypt"
-import { signIn } from "@/auth"
-import {
-  IRegister,
-  ICredentials,
-  credentialsValidator,
-  registerValidator,
-} from "@/lib/validations/credentials"
-import { AuthError } from "next-auth"
+import { ActionState, validatedAction } from "@/lib/auth/middleware"
+import { comparePasswords, hashPassword, setSession } from "@/lib/auth/session"
 import { redirect } from "next/navigation"
+import { cookies } from "next/headers"
 
-export async function login(values: ICredentials) {
-  const validatedFields = credentialsValidator.safeParse(values)
+const signInSchema = z.object({
+  email: z.string().email().min(3).max(255),
+  password: z.string().min(8).max(100),
+})
 
-  if (!validatedFields.success) {
-    return {
-      error: "Invalid Fields",
-    }
-  }
+export const login = validatedAction(
+  signInSchema,
+  async (data, _: ActionState) => {
+    const { email, password } = data
 
-  const { email, password } = validatedFields.data
+    if (!email || !password) return null
 
-  try {
-    await signIn("credentials", {
-      email,
-      password,
-      redirect: false,
+    const user = await db.user.findUnique({
+      where: {
+        email: email,
+      },
     })
 
-    return {
-      ok: true,
-      message: "Signed in successfully",
-    }
-  } catch (error) {
-    if (error instanceof AuthError) {
-      switch (error.type) {
-        case "CredentialsSignin":
-          return {
-            error: "Invalid Credentials",
-          }
-        default:
-          return {
-            error: "Something went wrong",
-          }
+    if (!user) {
+      return {
+        error: "Invalid email or password",
+        email,
+        password,
       }
     }
 
-    throw error
-  }
-}
+    const isPasswordValid = await comparePasswords(password, user.password!)
 
-export async function register(values: IRegister) {
-  const validatedFields = registerValidator.safeParse(values)
-
-  if (!validatedFields.success) {
-    return {
-      error: "Invalid Fields",
+    if (!isPasswordValid) {
+      return {
+        error: "Invalid email or password",
+        email,
+        password,
+      }
     }
+
+    await setSession(user)
+
+    redirect("/")
   }
+)
 
-  const { firstName, lastName, email, password, confirmPassword } =
-    validatedFields.data
+const registerSchema = signInSchema.extend({
+  firstName: z.string().min(4),
+  lastName: z.string().min(4),
+  confirmPassword: z.string().min(4, {
+    message: "Password must be at least 4 character",
+  }),
+})
 
-  const isEmailExist = await db.user.findFirst({
-    where: { email },
-  })
+export const createUser = validatedAction(
+  registerSchema,
+  async (data, _: ActionState) => {
+    const { email, firstName, lastName, password, confirmPassword } = data
 
-  if (isEmailExist) {
-    return {
-      error: "User already exist",
+    console.log(email, firstName, lastName, password, confirmPassword)
+
+    const isEmailExist = await db.user.findFirst({
+      where: { email },
+    })
+
+    if (isEmailExist) {
+      return {
+        error: "User already exist",
+      }
     }
-  }
 
-  const hashedPassword = await bcrypt.hash(password, 12)
-  const randomNumber = Math.floor(Math.random() * 6) + 1
+    const hashedPassword = await hashPassword(password)
+    const randomNumber = Math.floor(Math.random() * 6) + 1
 
-  if (password !== confirmPassword) {
-    return {
-      error: "The passwords did not match",
+    if (password !== confirmPassword) {
+      return {
+        error: "The passwords did not match",
+      }
     }
-  }
 
-  await db.user.create({
-    data: {
-      email,
-      password: hashedPassword,
-      name: `${firstName} ${lastName}`,
-      image: `/avatar-${randomNumber}.png`,
-      username: `${firstName.toLowerCase()}${lastName.toLowerCase()}`,
-    },
-  })
+    const user = await db.user.create({
+      data: {
+        email,
+        password: hashedPassword,
+        name: `${firstName} ${lastName}`,
+        image: `/avatar-${randomNumber}.png`,
+        username: `${firstName.toLowerCase()}${lastName.toLowerCase()}`,
+      },
+    })
 
-  return {
-    ok: true,
-    message: "Success",
+    await setSession(user)
+
+    redirect("/")
   }
+)
+
+export async function signOut() {
+  ;(await cookies()).delete("session")
 }

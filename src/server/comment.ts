@@ -1,20 +1,23 @@
 "use server"
 
-import { auth } from "@/auth"
 import db from "@/lib/db"
+import { getUser } from "@/lib/user"
+import { type CreateComment } from "@/types"
 
-export async function createComment(comment: ICreateComment) {
+export async function createComment(comment: CreateComment) {
   const { commentText, postId } = comment
 
-  const session = await auth()
+  const session = await getUser()
 
-  if (!session) throw new Error("Not authenticated!")
+  if (!session) return
+
+  const userId = session.id
 
   const createdComment = await db.comment.create({
     data: {
       comment: commentText,
-      postId: postId,
-      userId: session.user.id,
+      postId,
+      userId,
     },
     include: {
       user: {
@@ -30,7 +33,7 @@ export async function createComment(comment: ICreateComment) {
           id: true,
         },
         where: {
-          userId: session?.user.id,
+          userId,
         },
       },
       _count: {
@@ -57,7 +60,7 @@ export async function updateComment({
   comment: string
   commentId: string
 }) {
-  const session = await auth()
+  const session = await getUser()
 
   if (!session) return
 
@@ -80,7 +83,7 @@ export async function updateComment({
 }
 
 export const deleteComment = async ({ commentId }: { commentId: string }) => {
-  const session = await auth()
+  const session = await getUser()
 
   if (!session)
     return {

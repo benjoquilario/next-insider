@@ -1,23 +1,31 @@
 "use server"
 
-import { auth } from "@/auth"
+import { getUser } from "@/lib/user"
 import db from "@/lib/db"
+import type { CreatePost, UpdatePost } from "@/types"
 import { UTApi } from "uploadthing/server"
 
-export const createPost = async (values: ICreatePost) => {
-  const session = await auth()
+export const createPost = async (data: CreatePost) => {
+  const session = await getUser()
 
   if (!session) return
 
-  const userId = session.user.id
-  // const name = session.user.name
+  const userId = session.id
 
-  const { content, selectedFile } = values
+  const { content, selectedFile } = data
+
+  const transformedSelectedFile = selectedFile?.map((file) => ({
+    url: file.url,
+    key: file.key,
+  }))
 
   const newPost = await db.post.create({
     data: {
       content: content,
       userId,
+      selectedFile: {
+        create: transformedSelectedFile,
+      },
     },
     include: {
       user: {
@@ -39,16 +47,6 @@ export const createPost = async (values: ICreatePost) => {
     },
   })
 
-  if (selectedFile?.length) {
-    await db.selectedFile.createMany({
-      data: selectedFile.map((file) => ({
-        url: file.url,
-        key: file.key,
-        postId: newPost.id,
-      })),
-    })
-  }
-
   return {
     data: newPost,
     message: "success",
@@ -56,12 +54,13 @@ export const createPost = async (values: ICreatePost) => {
 }
 
 export const updatePost = async (
-  values: IUpdatePost & { fileIds: string[]; deletedKeys: string[] }
+  values: UpdatePost & { fileIds: string[]; deletedKeys: string[] }
 ) => {
-  const session = await auth()
+  const session = await getUser()
   const utapi = new UTApi()
 
   if (!session) return
+
   const { content, selectedFile, postId, fileIds, deletedKeys } = values
 
   if (fileIds.length && deletedKeys.length) {
@@ -106,7 +105,7 @@ export const updatePost = async (
 }
 
 export const deletePost = async ({ postId }: { postId: string }) => {
-  const session = await auth()
+  const session = await getUser()
   const utapi = new UTApi()
 
   if (!session)

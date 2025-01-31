@@ -1,19 +1,21 @@
 import db from "@/lib/db"
-import { auth } from "@/auth"
+import { getUser } from "@/lib/user"
 import { type NextRequest, NextResponse } from "next/server"
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: { commentId: string } }
+  { params }: { params: Promise<{ commentId: string }> }
 ) {
-  const commentId = params.commentId
+  const { commentId } = await params
 
   const searchParams = req.nextUrl.searchParams
   const limit = searchParams.get("limit")
   const skip = searchParams.get("cursor")
-  const session = await auth()
+  const session = await getUser()
 
-  const comments = await db.replyComment.findMany({
+  const userId = session?.id
+
+  const replies = await db.replyComment.findMany({
     where: {
       commentId,
     },
@@ -31,7 +33,7 @@ export async function GET(
           id: true,
         },
         where: {
-          userId: session?.user.id,
+          userId,
         },
       },
       _count: {
@@ -45,32 +47,31 @@ export async function GET(
     skip: Number(skip) || 0,
   })
 
-  const nextId =
-    comments.length < Number(limit) ? undefined : comments[Number(limit) - 1].id
-
-  if (comments.length === 0) {
+  if (replies.length === 0) {
     return NextResponse.json({
-      replies: [],
+      data: [],
       hasNextPage: false,
       nextSkip: null,
     })
   }
 
-  const transformedPosts = comments.map((post) => {
-    const { _count, likeReplyComment, ...rest } = post
+  const transformedReplies = replies.map((post) => {
+    const { _count, likeReplyComment, user, ...rest } = post
     return {
       ...rest,
       _count,
+      user,
       likeReplyComment,
       isLiked: session ? likeReplyComment.length > 0 : false,
+      isUserReplies: user.id === session?.id ? true : false,
     }
   })
 
   return NextResponse.json({
-    replies: transformedPosts,
-    hasNextPage: comments.length < (Number(limit) || 5) ? false : true,
+    data: transformedReplies,
+    hasNextPage: replies.length < (Number(limit) || 5) ? false : true,
     nextSkip:
-      comments.length < (Number(limit) || 5)
+      replies.length < (Number(limit) || 5)
         ? null
         : Number(skip) + (Number(limit) as number),
   })

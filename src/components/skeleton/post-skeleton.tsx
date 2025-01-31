@@ -1,7 +1,3 @@
-"use client"
-
-import React from "react"
-
 const PostSkeleton = () => {
   return (
     <div className="mx-auto mb-4 w-full rounded-md p-3 shadow">

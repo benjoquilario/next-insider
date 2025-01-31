@@ -2,7 +2,7 @@ import React from "react"
 import type { Metadata } from "next"
 
 export const metadata: Metadata = {
-  title: "Edit Profile -Insider",
+  title: "Edit Profile",
 }
 
 interface EditProfileLayoutProps {

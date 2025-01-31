@@ -1,37 +1,36 @@
-import NextAuth from "next-auth"
 import { NextResponse } from "next/server"
-import { authConfig } from "./auth.config"
+import { NextRequest } from "next/server"
 
-const { auth } = NextAuth(authConfig)
+export async function middleware(request: NextRequest) {
+  const { pathname } = request.nextUrl
+  const sessionCookie = request.cookies.get("session")
 
-export default auth((req) => {
-  const pathname = req.nextUrl.pathname
-
-  const isAuth = !!req.auth
-  const isAuthPage =
-    pathname.startsWith("/login") || pathname.startsWith("/register")
-
+  console.log("sessionCookie", sessionCookie)
   const sensitiveRoutes = ["/", "/setting", "/profile", "/edit-profile"]
 
   const isAccessingSensitiveRoute = sensitiveRoutes.some((route) =>
     pathname.startsWith(route)
   )
 
-  if (isAuthPage) {
-    if (isAuth) {
-      return NextResponse.redirect(new URL("/", req.url))
+  const authRoutes =
+    pathname.startsWith("/login") || pathname.startsWith("/register")
+
+  if (authRoutes) {
+    if (sessionCookie) {
+      return NextResponse.redirect(new URL("/", request.url))
     }
 
     return NextResponse.next()
   }
 
-  if (!isAuth && isAccessingSensitiveRoute) {
-    return NextResponse.redirect(new URL("/login", req.url))
+  if (isAccessingSensitiveRoute && !sessionCookie) {
+    return NextResponse.redirect(new URL("/login", request.url))
   }
-})
+}
 
 export const config = {
   matcher: [
+    "/((?!api|_next/static|_next/image|favicon.ico).*)",
     "/",
     "/login",
     "/register",

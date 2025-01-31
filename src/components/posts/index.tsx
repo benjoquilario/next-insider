@@ -2,19 +2,16 @@
 
 import React from "react"
 import PostItem from "./post-item"
-import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query"
-import { QUERY_KEYS } from "@/lib/queriesKey"
-import PostSkeleton from "@/components/skeleton/post-skeleton"
+import { useInfiniteQuery } from "@tanstack/react-query"
+// import { QUERY_KEYS } from "@/lib/queriesKey"
+// import PostSkeleton from "@/components/skeleton/post-skeleton"
 import { InView } from "react-intersection-observer"
 import { motion, AnimatePresence } from "framer-motion"
-import type { User } from "@prisma/client"
-import { useSession } from "next-auth/react"
+import PostSkeleton from "../skeleton/post-skeleton"
+import { type IPost } from "@/types"
+import { type User } from "@prisma/client"
 
 const Posts = () => {
-  const queryClient = useQueryClient()
-
-  const { data: session } = useSession()
-
   const {
     data: posts,
     isPending,
@@ -22,31 +19,28 @@ const Posts = () => {
     hasNextPage,
     isFetchingNextPage,
   } = useInfiniteQuery({
-    queryKey: [QUERY_KEYS.GET_INFINITE_POSTS],
+    queryKey: ["posts"],
     queryFn: async ({ pageParam }) => {
-      const response = await fetch(`/api/posts?limit=${3}&cursor=${pageParam}`)
+      const res = await fetch(`/api/posts?cursor=${pageParam}&limit=${3}`)
 
-      const data = await response.json()
-
-      data.posts.map((post: any) => {
-        queryClient.setQueryData(["posts", post.id], post)
-      })
+      const data = await res.json()
 
       return data
     },
-
     initialPageParam: 0,
     getNextPageParam: (lastPage) => lastPage.nextSkip,
     refetchOnWindowFocus: false,
   })
 
   return (
-    <ul className="space-y-3">
+    <ul className="w-full space-y-3">
       <AnimatePresence>
         {isPending
-          ? Array.from(Array(2), (_, i) => <PostSkeleton key={i} />)
+          ? Array.from(Array(2), (_, i) => (
+              <PostSkeleton key={`post-${i}-skeleton`} />
+            ))
           : posts?.pages.map((page) =>
-              page?.posts.map((post: IPost<User>) => (
+              page?.data.map((post: IPost<User>) => (
                 <motion.li
                   key={post.id}
                   initial={{ opacity: 0 }}
@@ -56,8 +50,10 @@ const Posts = () => {
                 >
                   <PostItem
                     key={post.id}
-                    isUserPost={post.user.id === session?.user.id}
+                    // will be removed once the query is fixed
                     post={post}
+                    havePhoto={post.selectedFile.length !== 0}
+                    isUserPost={post.isUserPost}
                   />
                 </motion.li>
               ))
@@ -73,7 +69,7 @@ const Posts = () => {
           {({ ref }) => (
             <li ref={ref} className="mt-4 w-full">
               {isFetchingNextPage &&
-                Array.from(Array(2), (_, i) => <PostSkeleton key={i} />)}
+                Array.from(Array(2), (_, i) => <PostSkeleton key={i + 2} />)}
             </li>
           )}
         </InView>

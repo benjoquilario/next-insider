@@ -1,25 +1,22 @@
 import { create } from "zustand"
+import { type ISelectedFile } from "@/types"
 
-interface ISelectPost {
-  id: string
+interface SelectUpdatePost {
+  postId: string
   content: string
   selectedFile: ISelectedFile[]
 }
 
-interface InitialPost {
+interface InitialState {
   isPostOpen: boolean
-  setIsPostOpen: (isPostOpen: boolean) => void
-  selectedPostId: string
-  setSelectedPostId: (currentPostId: string) => void
-  selectedPost: {
-    id: string
-    content: string
-    selectedFile: ISelectedFile[]
-  }
+  setIsPostOpen: (value: boolean) => void
+  isUpdating: boolean
+  setIsUpdating: (value: boolean) => void
+  postId: string
+  setUpdatePostId: (value: string) => void
+  setSelectedPost: (selectPost: SelectUpdatePost) => void
+  selectedPost: SelectUpdatePost
   clearSelectedPost: () => void
-  setSelectedPost: (selectPost: ISelectPost) => void
-  isEditing: boolean
-  setIsEditing: (isEditing: boolean) => void
   deletedFiles: string[]
   setDeletedFiles: (id: string) => void
   clearDeletedFiles: () => void
@@ -27,37 +24,29 @@ interface InitialPost {
   setDeletedKeys: (key: string) => void
   clearDeletedKeys: () => void
 }
-
-const usePostStore = create<InitialPost>((set) => ({
+const usePostStore = create<InitialState>((set) => ({
   isPostOpen: false,
-  setIsPostOpen: (isPostOpen) => set({ isPostOpen }),
-  selectedPostId: "",
-  setSelectedPostId: (selectedPostId) => set({ selectedPostId }),
+  setIsPostOpen: (value) => set({ isPostOpen: value }),
+  isUpdating: false,
+  setIsUpdating: (value) => set({ isUpdating: value }),
+  postId: "",
+  setUpdatePostId: (postId) => set({ postId }),
   selectedPost: {
-    id: "",
+    postId: "",
     content: "",
     selectedFile: [],
   },
+  setSelectedPost: (selectedPost) => set({ selectedPost }),
+  deletedFiles: [],
+  setDeletedFiles: (id) =>
+    set((state) => ({ deletedFiles: [id, ...state.deletedFiles] })),
+  clearSelectedPost: () =>
+    set({ selectedPost: { postId: "", content: "", selectedFile: [] } }),
+  clearDeletedFiles: () => set({ deletedFiles: [] }),
   deletedKeys: [],
   setDeletedKeys: (key) =>
     set((state) => ({ deletedKeys: [key, ...state.deletedKeys] })),
   clearDeletedKeys: () => set({ deletedKeys: [] }),
-  deletedFiles: [],
-  setDeletedFiles: (id) =>
-    set((state) => ({ deletedFiles: [id, ...state.deletedFiles] })),
-  clearDeletedFiles: () => set({ deletedFiles: [] }),
-  setSelectedPost: (selectedPost) => set({ selectedPost }),
-  clearSelectedPost: () =>
-    set({
-      selectedPost: {
-        id: "",
-        content: "",
-        selectedFile: [],
-      },
-    }),
-
-  isEditing: false,
-  setIsEditing: (isEditing) => set({ isEditing }),
 }))
 
 export default usePostStore

@@ -1,16 +1,16 @@
 import db from "@/lib/db"
-import { auth } from "@/auth"
+import { getUser } from "@/lib/user"
 import { type NextRequest, NextResponse } from "next/server"
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: { userId: string } }
+  { params }: { params: Promise<{ userId: string }> }
 ) {
-  const userId = params.userId
+  const { userId } = await params
   const searchParams = req.nextUrl.searchParams
   const limit = searchParams.get("limit")
   const skip = searchParams.get("cursor")
-  const session = await auth()
+  const session = await getUser()
 
   const posts = await db.post.findMany({
     where: {
@@ -30,7 +30,7 @@ export async function GET(
           id: true,
         },
         where: {
-          userId: session?.user.id,
+          userId: session?.id,
         },
       },
       _count: {
@@ -46,29 +46,28 @@ export async function GET(
     skip: Number(skip) || 0,
   })
 
-  const nextId =
-    posts.length < Number(limit) ? undefined : posts[Number(limit) - 1].id
-
   if (posts.length === 0) {
     return NextResponse.json({
-      posts: [],
+      data: [],
       hasNextPage: false,
       nextSkip: null,
     })
   }
 
   const transformedPosts = posts.map((post) => {
-    const { _count, likePost, ...rest } = post
+    const { _count, likePost, user, ...rest } = post
     return {
       ...rest,
       _count,
       likePost,
+      user,
       isLiked: session ? likePost.length > 0 : false,
+      isUserPost: user.id === userId ? true : false,
     }
   })
 
   return NextResponse.json({
-    posts: transformedPosts,
+    data: transformedPosts,
     hasNextPage: posts.length < (Number(limit) || 5) ? false : true,
     nextSkip:
       posts.length < (Number(limit) || 5)

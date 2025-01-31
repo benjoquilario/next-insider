@@ -1,12 +1,11 @@
 import db from "@/lib/db"
-import { auth } from "@/auth"
 import { type NextRequest, NextResponse } from "next/server"
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: { userId: string } }
+  { params }: { params: Promise<{ userId: string }> }
 ) {
-  const userId = params.userId
+  const userId = (await params).userId
 
   const searchParams = req.nextUrl.searchParams
   const limit = searchParams.get("limit")
@@ -39,21 +38,16 @@ export async function GET(
     skip: Number(skip) || 0,
   })
 
-  const nextId =
-    activities.length < Number(limit)
-      ? undefined
-      : activities[Number(limit) - 1].id
-
   if (activities.length === 0) {
     return NextResponse.json({
-      activities: [],
+      data: [],
       hasNextPage: false,
       nextSkip: null,
     })
   }
 
   return NextResponse.json({
-    activities,
+    data: activities,
     hasNextPage: activities.length < (Number(limit) || 5) ? false : true,
     nextSkip:
       activities.length < (Number(limit) || 5)

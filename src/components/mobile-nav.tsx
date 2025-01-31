@@ -1,47 +1,55 @@
 "use client"
 
 import React from "react"
-import { LINKS } from "./nav"
 import { cn } from "@/lib/utils"
 import Link from "next/link"
-import { useSession } from "next-auth/react"
-import { Button } from "./ui/button"
 import { BsPerson } from "react-icons/bs"
-import { SignOut } from "./sign-out"
+import SignOut from "./sign-out"
 import { IoCreateOutline } from "react-icons/io5"
 import usePostStore from "@/store/post"
+import { useUser } from "@/lib/auth"
+import { SquareStack, UserRoundSearch, BellRing } from "lucide-react"
 
 const MobileNav = () => {
-  const { data: session } = useSession()
+  const { session } = useUser()
   const setIsPostOpen = usePostStore((store) => store.setIsPostOpen)
+
+  const className = cn(
+    "flex w-full items-center justify-center rounded-md p-2 focus:outline-none",
+    "focus-visible:outline-offset-2 focus-visible:outline-primary",
+    "transition duration-75 hover:bg-primary/40"
+  )
 
   return (
     <div className="fixed bottom-0 z-50 flex w-full bg-background md:hidden">
       <nav className="w-full" aria-label="mobile nav">
-        <ul className="flex items-start">
-          {LINKS.map((link) => (
-            <li key={link.linkName} className="flex flex-1 items-start">
-              <Link
-                aria-label={link.linkName}
-                href="/"
-                className={cn(
-                  "flex w-full items-center justify-center rounded-md p-2 focus:outline-none",
-                  "focus-visible:outline-offset-2 focus-visible:outline-primary",
-                  "transition duration-75 hover:bg-primary/40"
-                )}
-              >
-                <link.icon
-                  aria-hidden="true"
-                  size={link.size}
-                  className="text-primary"
-                />
-              </Link>
-            </li>
-          ))}
+        <ul className="mt-1 flex items-start">
+          <li className="flex flex-1 items-start">
+            <Link href="/" className={className}>
+              <SquareStack aria-hidden="true" className="size-6 text-primary" />
+            </Link>
+          </li>
+          <li className="flex flex-1 items-start">
+            <Link
+              aria-label="feed"
+              href={`/discover`}
+              className={cn(className)}
+            >
+              <UserRoundSearch
+                aria-hidden="true"
+                className="size-6 text-primary"
+              />
+            </Link>
+          </li>
+          <li className="flex flex-1 items-start">
+            <Link aria-label="feed" href={`/nofications`} className={className}>
+              <BellRing aria-hidden="true" className="size-6 text-primary" />
+            </Link>
+          </li>
           <li className="flex flex-1 items-start">
             <Link
               aria-label="my profile"
-              href={`/profile/${session?.user.id}`}
+              href={`/profile/${session?.id}`}
               className={cn(
                 "flex w-full items-center justify-center rounded-md p-2 focus:outline-none",
                 "focus-visible:outline-offset-2 focus-visible:outline-primary",

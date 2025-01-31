@@ -10,8 +10,9 @@ export const userSchema = z.object({
   username: nonEmptyString.regex(/^[a-zA-Z0-9_]+$/, {
     message: "Only alphanumeric characters and underscores are allowed",
   }),
+  cover: z.string().optional(),
+  image: z.string().optional(),
   name: nonEmptyString,
-  // email: nonEmptyString.email(),
   phoneNumber: nonEmptyString
     .regex(
       new RegExp(/^([+]?[\s0-9]+)?(\d{3}|[(]?[0-9]+[)])?([-]?[\s]?[0-9])+$/),
@@ -37,31 +38,9 @@ export const userSchema = z.object({
       z.literal("MARRIED"),
     ])
     .nullable(),
-  birthDate: z.nullable(
-    z.string().superRefine((value, ctx) => {
-      const today = new Date()
-      const selectedDate = new Date(value)
-
-      const min = sub(today, { years: 85 })
-      const max = sub(today, { years: 18 })
-
-      if (selectedDate > max) {
-        // you must be at least 18 years old
-        ctx.addIssue({
-          message: "You must be at least 18 years old",
-          code: z.ZodIssueCode.invalid_date,
-        })
-      }
-
-      if (selectedDate < min) {
-        // you must be younger than
-        ctx.addIssue({
-          message: "You must be younger than 85 years old",
-          code: z.ZodIssueCode.invalid_date,
-        })
-      }
-    })
-  ),
+  birthDate: z.date({
+    required_error: "A date of birth is required.",
+  }),
 })
 
 export type UserSchema = z.infer<typeof userSchema>

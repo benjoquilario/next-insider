@@ -1,119 +1,42 @@
-"use client"
-
-import React from "react"
-import { cn } from "@/lib/utils"
-import ProfilePhoto from "@/components/profile/profile-photo"
-import CoverPhoto from "@/components/profile/cover-photo"
+import { getProfile } from "@/lib/queries"
+import { getUser } from "@/lib/user"
+import Profile from "../_components/profile"
+import { redirect } from "next/navigation"
+import { type UserProfile } from "@/types"
+import { Suspense } from "react"
 import ProfileSkeleton from "@/components/skeleton/profile-skeleton"
-import TabsProfile from "@/components/profile/tabs"
-import { useQueryUserById } from "@/hooks/queries/useQueryUserById"
-import { useSession } from "next-auth/react"
-import { Button, buttonVariants } from "@/components/ui/button"
-import type { User } from "@prisma/client"
-import Link from "next/link"
-import { useFolloMutation } from "@/hooks/useFollowMutation"
+import TabsProfile from "../_components/tabs"
+import About from "../_components/about"
 
-const ProfilePage = ({ params }: { params: { userId: string } }) => {
-  const userId = params.userId
-  const { data: session } = useSession()
+const ProfilePage = async ({
+  params,
+}: {
+  params: Promise<{ userId: string }>
+}) => {
+  const { userId } = await params
 
-  const { data: user, isPending } = useQueryUserById(userId)
+  const user = await getUser()
 
-  const isFollowing = user?.isFollowing
+  if (!user) redirect("/login")
+  if (!userId) redirect("/")
 
-  const { followMutation, unFollowMutation } = useFolloMutation({
-    userIdToFollow: userId,
-  })
-
-  const handleFollowUser = () => {
-    isFollowing ? unFollowMutation.mutate() : followMutation.mutate()
-  }
-
-  const isCurrentUser = userId === session?.user.id
+  const profile = getProfile({ userId })
 
   return (
     <div className="col-span-full lg:col-span-9 xl:col-span-6">
-      {/*  */}
-      {isPending ? (
-        <ProfileSkeleton />
-      ) : (
-        <div className="mb-2 mt-0">
-          <CoverPhoto userId={userId} photoUrl={user?.cover!} />
-          <div className="space-y-4">
-            <div className="flex flex-col justify-center shadow md:flex-row md:justify-between">
-              <div className="flex flex-col items-center justify-center gap-3 px-5 py-2 md:flex-row md:pb-5">
-                <ProfilePhoto userId={userId} photoUrl={user?.image!} />
-                <div className="text-center sm:text-left">
-                  <div>
-                    <h1 className="text-lg font-semibold capitalize text-foreground">
-                      {user?.name}
-                    </h1>
-                    <p className="text-sm text-muted-foreground">
-                      {user?.email}
-                    </p>
-                    <div className="flex items-center gap-2">
-                      <Link
-                        href={`/profile/${userId}/followers`}
-                        className="text-sm text-muted-foreground/90 underline-offset-1 hover:underline"
-                      >
-                        <span className="mr-1 font-semibold">
-                          {user?.followerCount}
-                        </span>
-                        Followers
-                      </Link>
-                      <Link
-                        href={`/profile/${userId}/following`}
-                        className="text-sm text-muted-foreground/90 underline-offset-1 hover:underline"
-                      >
-                        <span className="mr-1 font-semibold">
-                          {user?.followingCount}
-                        </span>
-                        Following
-                      </Link>
-                    </div>
-                  </div>
-                </div>
-              </div>
+      <Suspense fallback={<ProfileSkeleton />}>
+        <Profile
+          userId={userId}
+          profilePromise={profile as Promise<UserProfile>}
+        />
+      </Suspense>
 
-              <div className="flex items-start justify-center p-3">
-                {!isCurrentUser ? (
-                  <Button
-                    onClick={handleFollowUser}
-                    variant={isFollowing ? "default" : "secondary"}
-                    className="flex items-center gap-1 rounded-full"
-                  >
-                    {isFollowing ? "Following" : "Follow"}
-                  </Button>
-                ) : (
-                  <Link
-                    href="/edit-profile"
-                    className={cn(buttonVariants({ variant: "outline" }))}
-                  >
-                    Edit Profile
-                  </Link>
-                )}
-
-                {/* )} */}
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-      {user?.bio ? (
-        <div className="my-2 flex w-full items-center justify-center rounded-sm p-3 text-center shadow">
-          <p className="max-w-80 text-sm italic text-muted-foreground">
-            {user.bio}
-          </p>
-        </div>
-      ) : null}
-
-      <TabsProfile
-        isUserPost={isCurrentUser}
-        user={user as User}
-        userId={userId}
-      />
+      <TabsProfile userId={userId} isUserPost={user.id === userId}>
+        <Suspense fallback={<div>loading...</div>}>
+          <About profilePromise={profile as Promise<UserProfile>} />
+        </Suspense>
+      </TabsProfile>
     </div>
   )
 }
-
 export default ProfilePage

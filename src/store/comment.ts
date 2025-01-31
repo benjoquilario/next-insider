@@ -1,37 +1,28 @@
 import { create } from "zustand"
 
-interface ISelectComment {
+interface SelectUpdateComment {
+  commentId: string
   comment: string
-  commentId: string
 }
 
-interface IInitialComment {
-  selectedComment: {
-    commentId: string
-    comment: string
-  }
-  commentId: string
-  setCommentId: (commentId: string) => void
+interface CommentStore {
+  selectedComment: SelectUpdateComment
+  isAlertOpen: boolean
+  setIsAlertOpen: (value: boolean) => void
+  setSelectedComment: (selectComment: SelectUpdateComment) => void
   clearSelectedComment: () => void
-  setSelectedComment: (selectedComment: ISelectComment) => void
 }
 
-const useCommentStore = create<IInitialComment>((set) => ({
+const useCommentStore = create<CommentStore>((set) => ({
   selectedComment: {
     commentId: "",
     comment: "",
   },
-  commentId: "",
-  setCommentId: (commentId) => set({ commentId }),
-  clearSelectedComment: () =>
-    set({
-      selectedComment: {
-        commentId: "",
-        comment: "",
-      },
-      commentId: "",
-    }),
+  isAlertOpen: false,
+  setIsAlertOpen: (value) => set({ isAlertOpen: value }),
   setSelectedComment: (selectedComment) => set({ selectedComment }),
+  clearSelectedComment: () =>
+    set({ selectedComment: { comment: "", commentId: "" } }),
 }))
 
 export default useCommentStore

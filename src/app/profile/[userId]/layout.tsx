@@ -1,38 +1,36 @@
-import React, { Suspense } from "react"
+import React from "react"
 import Layout from "@/components/layout"
 import Section from "@/components/section"
 import type { Metadata } from "next"
-import { getUserById } from "@/lib/metrics"
 import { capitalizeName } from "@/lib/utils"
-
-interface ProfileLayoutProps {
-  children: React.ReactNode
-  params: {
-    userId: string
-  }
-}
+import { getProfile } from "@/lib/queries"
+import { getUser } from "@/lib/user"
+import { UserProfile } from "@/types"
 
 export async function generateMetadata({
   params,
 }: {
-  params: {
+  params: Promise<{
     userId: string
-  }
+  }>
 }): Promise<Metadata | undefined> {
-  const userId = params.userId
+  const { userId } = await params
 
-  const profile = await getUserById({ userId })
-  if (!profile) {
-    return
-  }
+  const session = await getUser()
+
+  if (!session) return
+
+  const profile = (await getProfile({ userId })) as UserProfile
+
+  if (!profile) return
 
   const title = profile.name
   const imageUrl = profile.image
 
   return {
-    title: `${capitalizeName(title)} - Insider`,
+    title: `${capitalizeName(title ?? "")}`,
     openGraph: {
-      title: `@${capitalizeName(profile.username)} - Insider`,
+      title: `@${capitalizeName(title ?? "")}`,
       type: "website",
       url: `${process.env.NEXT_PUBLIC_APP_URL}/profile/${userId}`,
       images: [
@@ -45,7 +43,7 @@ export async function generateMetadata({
     },
     twitter: {
       card: "summary_large_image",
-      title,
+      title: `@${capitalizeName(title ?? "")}`,
       images: [
         {
           url: `${imageUrl}`,
@@ -57,9 +55,7 @@ export async function generateMetadata({
   }
 }
 
-const ProfileLayout = async (props: ProfileLayoutProps) => {
-  const { children } = props
-
+const ProfileLayout = async ({ children }: { children: React.ReactNode }) => {
   return (
     <Layout>
       <Section>{children}</Section>

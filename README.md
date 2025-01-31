@@ -1,146 +1,36 @@
-### Introducing Insider
+This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
-A Fullstack **social media application** built with **_Next JS_**, **_React_**, **_Tanstack-query_**_, and \*\*\_tailwindCSS_** as a frontend and **_Prisma_**, and **_Posgres DB_\*\* as a backend.
+## Getting Started
 
-<p align="center">
-  <a href="https://github.com/benjoquilario/t3-insider">
-      <img src="https://img.shields.io/github/stars/benjoquilario/t3-insider" alt="Github Stars">
-    </a>
-    <a href="https://www.gnu.org/licenses/agpl-3.0.en.html">
-      <img src="https://img.shields.io/github/issues/benjoquilario/t3-insider" alt="Github Issues">
-    </a>
-     <a href="https://github.com/benjoquilario/t3-insider">
-      <img src="https://img.shields.io/github/forks/benjoquilario/t3-insider" alt="Github Forks" />
-    </a>
-</p>
-
-</br>
-  <hr />
-<p align="center">
-  <a href="https://nextjs.org">
-    <img src="https://img.shields.io/github/package-json/dependency-version/benjoquilario/t3-insider/next?filename=package.json&color=fff&labelColor=000&logo=nextdotjs&style=flat-square">
-  </a>
-  <a href="https://tailwindcss.com/">
-    <img src="https://img.shields.io/github/package-json/dependency-version/benjoquilario/t3-insider/dev/tailwindcss?filename=package.json&color=37b8f1&logo=tailwindcss&labelColor=0b1120&style=flat-square&logoColor=38bdf8">
-  </a>
-  <a href="https://reactjs.org/">
-    <img src="https://img.shields.io/github/package-json/dependency-version/benjoquilario/t3-insider/react?filename=package.json&color=5fd9fb&logo=react&labelColor=222435&style=flat-square">
-  </a>
-  <a href="https://www.prisma.io/">
-    <img src="https://img.shields.io/github/package-json/dependency-version/benjoquilario/t3-insider/@prisma/client?filename=package.json&label=prisma&color=2D3748&logo=prisma&labelColor=000&style=flat-square&logoColor=fff">
-  </a>
-  <a href="https://react-hook-form.com/">
-    <img src="https://img.shields.io/github/package-json/dependency-version/benjoquilario/t3-insider/react-hook-form?filename=package.json&label=react-hook-form&color=EC5990&logo=reacthookform&labelColor=242526&style=flat-square&logoColor=EC5990">
-  </a>
-  <a href="https://tailwindcss.com/">
-    <img src="https://img.shields.io/github/package-json/dependency-version/benjoquilario/t3-insider/typescript?filename=package.json&color=3178C6&logo=typescript&labelColor=111&style=flat-square&logoColor=white">
-  </a>
-  <a href="https://www.framer.com/motion">
-    <img src="https://img.shields.io/github/package-json/dependency-version/benjoquilario/t3-insider/framer-motion?logo=framer&style=flat-square&logoColor=white">
-  </a>
-</p>
-
-## Screenshots
-
-<a href="https://t3-insider.vercel.app/" target="blank">
-  <img src="public/desktop.png" />
-</a>
-
-### Comments
-
-Share your thoughts in users posts
-
-<img src="public/comments.jpeg" alt="comments" />
-
-Try the App: [t3-insider](https://t3-insider.vercel.app/)
-
-### Features
-
-- Login and Register
-- Post CRUD functionalities
-- Comment CRUD Functionalities
-- Like post
-- like comment
-- Reply to comments
-- Profile Customization
-- Suggestion to Follow
-- Drag and Drop Image
-- Multiple images post
-- Followers/Following features
-- Fully Responsive
-- ...enough talk [see it yourself](https://t3-insider.vercel.app/)
-
-### Coming Features
-
-- Realtime Messaging features
-- Realtime Notification features
-- User can only see following users posts.
-- Dark more
-- Setting page
-- <s>Update profile functionalities</s> ✅
-  … and many more
-
-## Installation Steps
-
-1. Clone the repository
+First, run the development server:
 
 ```bash
-git clone https://github.com/benjoquilario/t3-insider.git
+npm run dev
+# or
+yarn dev
+# or
+pnpm dev
+# or
+bun dev
 ```
 
-2. Change the working directory
+Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-```bash
-cd t3-insider
-```
+You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
-3. Install dependencies
+This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
-```bash
-bun install
-```
+## Learn More
 
-4. Create `.env` file in root and add your variables
+To learn more about Next.js, take a look at the following resources:
 
-```bash
+- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
+- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
 
-AUTH_SECRET=
-DATABASE_URL=
-UPLOADTHING_SECRET=
-UPLOADTHING_APP_ID=
-AUTH_TRUST_HOST=http://localhost:3000
+You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
 
-```
+## Deploy on Vercel
 
-5. Sync your database
+The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
-```bash
-npx prisma migrade dev
-```
-
-6. Run the app
-
-```bash
-bun run dev
-```
-
-You are all set! Open [localhost:3000](http://localhost:3000/) to see the app.
-
-> [!NOTE]
-> This project is a work in progress, it still contains bugs and will constantly be updated to stay up-to-date with the latest framework changes.
-
-## Contribution
-
-Your ideas, translations, design changes, code cleaning, real heavy code changes, or any help are always welcome. The more is the contribution, the better it gets.
-
-[Pull requests](https://github.com/benjoquilario/t3-insider/pulls) will be reviewed
-
-## Author
-
-### Benjo Quilario
-
-- Twitter: [@iambenjo](https://twitter.com/iam_benjo)
-- Github: [@benjoquilario](https://github.com/benjoquilario)
-- Portfolio: [@benjoquilario](https://benjoquilario.me)
-
-Please give this repository a ⭐️ if you liked this app. It seems like a little thing, but it helps a lot with the motivation.
+Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.

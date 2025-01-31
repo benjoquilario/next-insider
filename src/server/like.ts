@@ -1,8 +1,7 @@
 "use server"
 
-import { auth } from "@/auth"
+import { getUser } from "@/lib/user"
 import db from "@/lib/db"
-import { pusherServer } from "@/lib/pusher"
 
 export const likePost = async ({
   postId,
@@ -11,10 +10,11 @@ export const likePost = async ({
   postId: string
   content: string
 }) => {
-  const session = await auth()
-  const userId = session?.user.id
+  const session = await getUser()
 
   if (!session) return
+
+  const userId = session.id
 
   const isLiked = await db.likePost.count({
     where: {
@@ -32,7 +32,7 @@ export const likePost = async ({
 
   const postLike = await db.likePost.create({
     data: {
-      userId: userId!,
+      userId: userId,
       postId,
     },
     select: {
@@ -61,10 +61,10 @@ export const likePost = async ({
 }
 
 export const unlikePost = async ({ postId }: { postId: string }) => {
-  const session = await auth()
-  const userId = session?.user.id
+  const session = await getUser()
 
   if (!session) return
+  const userId = session.id
 
   const isLiked = await db.likePost.count({
     where: {
@@ -103,10 +103,11 @@ export const likeComment = async ({
   commentId: string
   content: string
 }) => {
-  const session = await auth()
-  const userId = session?.user.id
+  const session = await getUser()
 
   if (!session) return
+
+  const userId = session.id
 
   const isLiked = await db.commentLike.count({
     where: {
@@ -124,7 +125,7 @@ export const likeComment = async ({
 
   const like = await db.commentLike.create({
     data: {
-      userId: userId!,
+      userId: userId,
       commentId,
     },
     select: {
@@ -153,12 +154,10 @@ export const likeComment = async ({
 }
 
 export const unlikeComment = async ({ commentId }: { commentId: string }) => {
-  const session = await auth()
-  const userId = session?.user.id
+  const session = await getUser()
 
   if (!session) return
-
-  console.log(session)
+  const userId = session.id
 
   const isLiked = await db.commentLike.count({
     where: {
@@ -197,10 +196,10 @@ export const likeReplyComment = async ({
   replyId: string
   content: string
 }) => {
-  const session = await auth()
-  const userId = session?.user.id
+  const session = await getUser()
 
   if (!session) return
+  const userId = session.id
 
   const isLiked = await db.likeReplyComment.count({
     where: {
@@ -247,10 +246,11 @@ export const likeReplyComment = async ({
 }
 
 export const unlikeReplyComment = async ({ replyId }: { replyId: string }) => {
-  const session = await auth()
-  const userId = session?.user.id
+  const session = await getUser()
 
   if (!session) return
+
+  const userId = session.id
 
   console.log(session)
 
