@@ -20,7 +20,7 @@ export function useCreateCommentMutation({ postId }: { postId: string }) {
         postId: comment.postId,
         commentText: comment.commentText,
       }),
-    onSuccess: (newComment) => {
+    onSuccess: async (newComment) => {
       queryClient.setQueryData<InfiniteData<IPage<Comment<User>[]>>>(
         queryKey,
         (oldData) => {

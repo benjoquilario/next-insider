@@ -3,11 +3,22 @@
 import db from "@/lib/db"
 import { getUser } from "@/lib/user"
 import { type CreateComment } from "@/types"
+import { headers } from "next/headers"
+import { ratelimit } from "@/lib/redis"
 
 export async function createComment(comment: CreateComment) {
+  const ip = (await headers()).get("x-forwarded-for")
   const { commentText, postId } = comment
 
   const session = await getUser()
+
+  const { success } = await ratelimit.limit(`${ip}`)
+
+  if (!success) {
+    throw new Error(
+      "Yo! Calm down cowboy, you are commenting too fast! take a few breath and calm down"
+    )
+  }
 
   if (!session) return
 

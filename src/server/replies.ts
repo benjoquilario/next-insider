@@ -2,15 +2,25 @@
 
 import { getUser } from "@/lib/user"
 import db from "@/lib/db"
+import { ratelimit } from "@/lib/redis"
+import { headers } from "next/headers"
 
 export async function createReplyComment(comment: {
   content: string
   commentId: string
 }) {
+  const ip = (await headers()).get("x-forwarded-for")
+
   const { content, commentId } = comment
 
   const session = await getUser()
+  const { success } = await ratelimit.limit(`${ip}`)
 
+  if (!success) {
+    throw new Error(
+      "Yo! Calm down cowboy, you are commenting too fast! take a few breaths and calm down"
+    )
+  }
   if (!session) return
 
   const userId = session.id

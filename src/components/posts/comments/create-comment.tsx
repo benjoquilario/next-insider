@@ -18,6 +18,7 @@ import { useCreateCommentMutation } from "@/hooks/mutation/comments/use-create-c
 import { commentSchema } from "@/lib/validations/comment"
 import * as React from "react"
 import { Textarea } from "@/components/ui/text-area"
+import { toast } from "sonner"
 
 const CreateComment = React.memo(({ postId }: { postId: string }) => {
   const user = useUser()
@@ -37,10 +38,17 @@ const CreateComment = React.memo(({ postId }: { postId: string }) => {
   const { createCommentMutation } = useCreateCommentMutation({ postId })
 
   const submit = function (formData: z.infer<typeof commentSchema>) {
-    createCommentMutation.mutate({
-      commentText: formData.comment,
-      postId: postId,
-    })
+    createCommentMutation.mutate(
+      {
+        commentText: formData.comment,
+        postId: postId,
+      },
+      {
+        onError: (error) => {
+          return toast.error(error.message)
+        },
+      }
+    )
 
     form.reset()
   }

@@ -4,9 +4,20 @@ import { getUser } from "@/lib/user"
 import db from "@/lib/db"
 import type { CreatePost, UpdatePost } from "@/types"
 import { UTApi } from "uploadthing/server"
+import { ratelimit } from "@/lib/redis"
+import { headers } from "next/headers"
 
 export const createPost = async (data: CreatePost) => {
+  const ip = (await headers()).get("x-forwarded-for")
+
   const session = await getUser()
+  const { success } = await ratelimit.limit(`${ip}`)
+
+  if (!success) {
+    throw new Error(
+      "Yo! Calm down cowboy, you are commenting too fast! take a few breath and calm down"
+    )
+  }
 
   if (!session) return
 
