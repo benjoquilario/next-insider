@@ -97,8 +97,8 @@ const Signup = () => {
               />
             </div>
 
-            <SubmitButton>Sign up</SubmitButton>
-            <div className="relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t after:border-border">
+            <SubmitButton disabled={pending}>Sign up</SubmitButton>
+            {/* <div className="relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t after:border-border">
               <span className="relative z-10 bg-background px-2 text-muted-foreground">
                 Or continue with
               </span>
@@ -111,7 +111,7 @@ const Signup = () => {
                 />
               </svg>
               Login with GitHub
-            </Button>
+            </Button> */}
           </div>
           <div className="text-center text-sm">
             Don&apos;t have an account?{' '}

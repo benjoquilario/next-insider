@@ -6,7 +6,7 @@ import {
   InfiniteData,
 } from "@tanstack/react-query"
 import { createComment } from "@/server/comment"
-import type { User } from "@prisma/client"
+import type { User } from "@/generated/prisma"
 import { IPage, Comment, CreateComment } from "@/types"
 import * as React from "react"
 
@@ -15,11 +15,19 @@ export function useCreateCommentMutation({ postId }: { postId: string }) {
   const queryClient = useQueryClient()
 
   const createCommentMutation = useMutation({
-    mutationFn: (comment: CreateComment) =>
-      createComment({
+    mutationFn: async (comment: CreateComment) => {
+      const res = await createComment({
         postId: comment.postId,
         commentText: comment.commentText,
-      }),
+      })
+
+      if (!res.ok) {
+        throw new Error(res.message)
+      }
+
+      return res
+    },
+
     onSuccess: async (newComment) => {
       queryClient.setQueryData<InfiniteData<IPage<Comment<User>[]>>>(
         queryKey,

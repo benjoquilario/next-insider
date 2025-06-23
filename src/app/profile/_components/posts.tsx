@@ -4,9 +4,9 @@ import { useInfiniteQuery } from "@tanstack/react-query"
 import { InView } from "react-intersection-observer"
 import { AnimatePresence, motion } from "framer-motion"
 import CreateButton from "@/components/posts/create-button"
-import type { User } from "@prisma/client"
+import type { User } from "@/generated/prisma"
 import PostSkeleton from "@/components/skeleton/post-skeleton"
-import PostItem from "@/components/posts/post-item"
+import PostItem from "@/components/posts/post-item.new"
 import { useUser } from "@/lib/auth"
 import { IPost } from "@/types"
 import React from "react"
@@ -41,7 +41,9 @@ const Posts = (props: PostsUserProps) => {
 
   return (
     <>
-      {userId === user?.id && <CreateButton userId={userId} />}
+      <div className="mt-2">
+        {userId === user?.id && <CreateButton userId={userId} />}
+      </div>
       <ul className="space-y-3">
         <AnimatePresence>
           {isPending

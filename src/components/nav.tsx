@@ -14,7 +14,7 @@ const Nav = () => {
   const className = cn(
     "flex w-full items-center space-x-3 rounded-md px-5 py-3 focus:outline-none",
     "focus-visible:outline-offset-2 focus-visible:outline-primary",
-    "transition duration-75 hover:bg-primary/40"
+    "transition duration-75 hover:bg-primary/10"
   )
 
   return (
@@ -23,8 +23,8 @@ const Nav = () => {
         <ul className="flex flex-col items-start space-y-2">
           <li className="flex flex-1 items-start">
             <Link href="/" className={className}>
-              <SquareStack aria-hidden="true" className="size-6 text-primary" />
-              <span className="text-left text-base font-medium capitalize tracking-tight">
+              <SquareStack aria-hidden="true" className="text-primary size-6" />
+              <span className="text-left text-base font-medium tracking-tight capitalize">
                 Feed
               </span>
             </Link>
@@ -37,17 +37,21 @@ const Nav = () => {
             >
               <UserRoundSearch
                 aria-hidden="true"
-                className="size-6 text-primary"
+                className="text-primary size-6"
               />
-              <span className="text-left text-base font-medium capitalize tracking-tight">
+              <span className="text-left text-base font-medium tracking-tight capitalize">
                 Discover
               </span>
             </Link>
           </li>
           <li className="flex flex-1 items-start">
-            <Link aria-label="feed" href={`/nofications`} className={className}>
-              <BellRing aria-hidden="true" className="size-6 text-primary" />
-              <span className="text-left text-base font-medium capitalize tracking-tight">
+            <Link
+              aria-label="feed"
+              href={`/notifications`}
+              className={className}
+            >
+              <BellRing aria-hidden="true" className="text-primary size-6" />
+              <span className="text-left text-base font-medium tracking-tight capitalize">
                 Notification
               </span>
             </Link>
@@ -57,14 +61,10 @@ const Nav = () => {
             <Link
               aria-label="my profile"
               href={`/profile/${session?.id}`}
-              className={cn(
-                "flex w-full items-center space-x-3 rounded-md px-5 py-3 focus:outline-none",
-                "focus-visible:outline-offset-2 focus-visible:outline-primary",
-                "transition duration-75 hover:bg-primary/40"
-              )}
+              className={cn(className)}
             >
-              <User className="size-6 text-primary" />
-              <span className="text-left text-base font-medium capitalize tracking-tight">
+              <User className="text-primary size-6" />
+              <span className="text-left text-base font-medium tracking-tight capitalize">
                 My Profile
               </span>
             </Link>

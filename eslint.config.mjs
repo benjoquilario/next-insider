@@ -20,6 +20,13 @@ const eslintConfig = [
       "@typescript-eslint/no-explicit-any": "off",
       "@typescript-eslint/no-array-constructor": "off",
     },
+    ignores: [
+      "/src/generated/*",
+      "/dist/*",
+      "/node_modules/*",
+      "/.next/*",
+      "/target",
+    ],
   }),
 ]
 

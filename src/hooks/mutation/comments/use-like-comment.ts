@@ -6,7 +6,7 @@ import {
   useQueryClient,
 } from "@tanstack/react-query"
 import { likeComment, unlikeComment } from "@/server/like"
-import type { User } from "@prisma/client"
+import type { User } from "@/generated/prisma"
 import { useMemo } from "react"
 import type { Comment, IPage } from "@/types"
 
@@ -24,10 +24,10 @@ export function useLikeCommentMutation({
 
   const likeCommentMutation = useMutation({
     mutationFn: async () => {
-      const response = await likeComment({ commentId, content })
+      const res = await likeComment({ commentId, content })
 
-      if (!response?.ok) {
-        if (response?.status === 409) return
+      if (!res?.ok) {
+        return
       }
 
       return true
@@ -85,7 +85,7 @@ export function useLikeCommentMutation({
       const response = await unlikeComment({ commentId })
 
       if (!response?.ok) {
-        if (response?.status === 409) return
+        return
       }
 
       return true
@@ -133,7 +133,6 @@ export function useLikeCommentMutation({
 
       return { previousComment }
     },
-    onSettled: () => queryClient.invalidateQueries({ queryKey }),
     onError: (err, variables, context) => {
       queryClient.setQueryData(queryKey, context?.previousComment)
     },

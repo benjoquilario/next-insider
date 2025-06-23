@@ -1,6 +1,7 @@
 "use client"
 
 import { cn } from "@/lib/utils"
+import { Button } from "@/components/ui/button"
 
 interface LikeCommentProps {
   isLiked: boolean
@@ -9,16 +10,17 @@ interface LikeCommentProps {
 
 const LikeComment = ({ isLiked, handleLikeComment }: LikeCommentProps) => {
   return (
-    <button
-      type="button"
+    <Button
+      variant="ghost"
+      size="sm"
       onClick={() => handleLikeComment(isLiked)}
       className={cn(
-        "underline-offset-1 hover:underline",
-        isLiked && "font-bold text-primary"
+        "text-muted-foreground hover:text-foreground h-auto p-0 text-xs font-medium transition-colors",
+        isLiked && "text-primary font-bold"
       )}
     >
       Like
-    </button>
+    </Button>
   )
 }
 export default LikeComment

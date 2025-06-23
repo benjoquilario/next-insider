@@ -38,18 +38,22 @@ interface CreatePostProps {
 }
 
 const CreatePost = ({ content, selectedFile }: CreatePostProps) => {
-  const isPostOpen = usePostStore((state) => state.isPostOpen)
-  const setIsPostOpen = usePostStore((state) => state.setIsPostOpen)
   const [isError, setIsError] = useState(false)
-  const isUpdating = usePostStore((state) => state.isUpdating)
-  const setIsUpdating = usePostStore((state) => state.setIsUpdating)
-  const deletedKeys = usePostStore((state) => state.deletedKeys)
-  const deletedFiles = usePostStore((state) => state.deletedFiles)
-  const clearDeletedKeys = usePostStore((state) => state.clearDeletedKeys)
-  const clearDeletedFiles = usePostStore((state) => state.clearDeletedFiles)
-  const clearSelectedPost = usePostStore((state) => state.clearSelectedPost)
-  const setDeletedFiles = usePostStore((state) => state.setDeletedFiles)
-  const setDeletedKeys = usePostStore((state) => state.setDeletedKeys)
+
+  const {
+    isPostOpen,
+    setIsPostOpen,
+    isUpdating,
+    setIsUpdating,
+    deletedKeys,
+    deletedFiles,
+    clearDeletedKeys,
+    clearDeletedFiles,
+    clearSelectedPost,
+    setDeletedFiles,
+    setDeletedKeys,
+  } = usePostStore()
+
   const postId = usePostStore((state) => state.selectedPost.postId)
 
   const form = useForm<PostData>({
@@ -151,9 +155,9 @@ const CreatePost = ({ content, selectedFile }: CreatePostProps) => {
           reset()
           return "Post successfully created"
         },
-        error: (err) => {
-          form.reset()
-          return getErrorMessage(err)
+        finally: () => {
+          setIsError(false)
+          reset()
         },
       }
     )

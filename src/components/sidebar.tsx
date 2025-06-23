@@ -15,13 +15,13 @@ const SideBar = () => {
     <div className="sticky top-0">
       <Link
         href={`/profile/${user?.id}`}
-        className="focus-visible:outline-offset-2 focus-visible:outline-primary focus-visible:ring-primary"
+        className="focus-visible:outline-primary focus-visible:ring-primary focus-visible:outline-offset-2"
       >
         <div className="flex h-14 w-full items-center justify-start gap-2 px-5 text-2xl font-light">
           <span className="text-primary">
             <FaRegCircle />
           </span>
-          <span className="text-3xl font-bold uppercase text-primary">
+          <span className="text-primary text-3xl font-bold uppercase">
             Insider
           </span>
         </div>
@@ -36,10 +36,10 @@ const SideBar = () => {
               <Avatar>
                 <AvatarImage
                   src={user?.image ?? "/default-image.png"}
-                  alt={""}
+                  alt={user?.name ?? "User"}
                 />
                 <AvatarFallback>
-                  <div className="size-full animate-pulse"></div>
+                  <div className="bg-accent size-full animate-pulse"></div>
                 </AvatarFallback>
               </Avatar>
             </div>

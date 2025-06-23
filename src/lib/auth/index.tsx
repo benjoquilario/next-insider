@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import { AuthContext } from "@/components/contexts/auth-context"
-import { User } from "@prisma/client"
+import { User } from "@/generated/prisma"
 
 export function useUser() {
   const context = React.useContext(AuthContext)
