@@ -115,7 +115,7 @@ const RepliesItem = ({ replies, commentId }: RepliesItemProps) => {
               <div className="flex w-full items-center justify-between">
                 <span className="inline-flex flex-col">
                   <Link className="inline" href={`/profile/${userId}`}>
-                    <span className="inlin````e-flex">
+                    <span className="inline-flex">
                       <span
                         className="text-foreground max-w-full text-sm font-medium capitalize underline-offset-1 hover:underline"
                         style={{ wordBreak: "break-word" }}

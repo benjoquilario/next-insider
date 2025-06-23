@@ -3,7 +3,7 @@
 import { compare, hash } from "bcryptjs"
 import { SignJWT, jwtVerify } from "jose"
 import { cookies } from "next/headers"
-import { type User } from "@prisma/client"
+import { type User } from "@/generated/prisma"
 
 const key = new TextEncoder().encode(process.env.AUTH_SECRET)
 const SALT_ROUNDS = 12
