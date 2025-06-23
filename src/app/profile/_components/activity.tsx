@@ -7,8 +7,8 @@ import { IoPersonOutline } from "react-icons/io5"
 import { BsReplyAll } from "react-icons/bs"
 import { FaRegComment } from "react-icons/fa6"
 import { SlLike } from "react-icons/sl"
-import { Activitytype, User } from "@prisma/client"
-import { motion } from "framer-motion"
+import type { Activitytype, User } from "@/generated/prisma"
+import { motion, AnimatePresence } from "framer-motion"
 import { IActivity } from "@/types"
 import { InView } from "react-intersection-observer"
 import { useUser } from "@/lib/auth"
@@ -17,11 +17,15 @@ type ActivityUserProps = {
   userId: string
 }
 
+const activityVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: { opacity: 1, y: 0 },
+  exit: { opacity: 0, y: -20 },
+}
+
 const ActivityUser = (props: ActivityUserProps) => {
   const { userId } = props
-
   const queryKey = useMemo(() => ["activity", userId], [userId])
-
   const {
     data: activies,
     isPending,
@@ -39,44 +43,69 @@ const ActivityUser = (props: ActivityUserProps) => {
     refetchOnWindowFocus: false,
   })
 
+  // Flatten activities for easier mapping
+  const allActivities = React.useMemo(
+    () => activies?.pages.flatMap((page) => page?.data || []) || [],
+    [activies]
+  )
+
   return (
-    <div className="mb-2 mt-4">
-      <ul className="space-y-3">
-        {isPending
-          ? Array.from(Array(4), (_, i) => (
-              <li
-                key={`activity-${i}`}
+    <div className="mt-4 mb-2">
+      <motion.ul
+        className="space-y-3"
+        initial="hidden"
+        animate="visible"
+        exit="exit"
+        variants={{}}
+      >
+        <AnimatePresence initial={false}>
+          {isPending ? (
+            Array.from({ length: 4 }, (_, i) => (
+              <motion.li
+                key={`activity-skeleton-${i}`}
+                variants={activityVariants}
+                initial="hidden"
+                animate="visible"
+                exit="exit"
                 className="flex w-full animate-pulse items-center gap-2 px-2"
               >
-                <div className="size-14 rounded-full bg-primary/10"></div>
+                <div className="bg-primary/10 size-14 rounded-full"></div>
                 <div className="flex flex-col gap-2">
-                  <div className="h-6 w-56 rounded-md bg-primary/10"></div>
-                  <div className="h-4 w-28 rounded-md bg-primary/10"></div>
+                  <div className="bg-primary/10 h-6 w-56 rounded-md"></div>
+                  <div className="bg-primary/10 h-4 w-28 rounded-md"></div>
                 </div>
-              </li>
+              </motion.li>
             ))
-          : activies?.pages.map((page) =>
-              page?.data.length !== 0 ? (
-                page?.data.map((activity: IActivity<User>) => (
-                  <motion.li
-                    key={activity.id}
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    className="rounded-3xl bg-secondary p-2"
-                  >
-                    <Activity userId={userId} activity={activity} />
-                  </motion.li>
-                ))
-              ) : (
-                <li
-                  key={`no-activity`}
-                  className="mt-4 flex items-center justify-center text-center text-2xl font-medium"
-                >
-                  No activity!
-                </li>
-              )
-            )}
+          ) : allActivities.length > 0 ? (
+            allActivities.map((activity: IActivity<User>, idx) => (
+              <motion.li
+                key={activity.id}
+                variants={activityVariants}
+                initial="hidden"
+                animate="visible"
+                exit="exit"
+                transition={{
+                  duration: 0.35,
+                  delay: idx * 0.07,
+                  ease: "easeInOut",
+                }}
+                className="bg-secondary rounded-3xl p-2"
+              >
+                <Activity userId={userId} activity={activity} />
+              </motion.li>
+            ))
+          ) : (
+            <motion.li
+              key="no-activity"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="mt-4 flex items-center justify-center text-center text-2xl font-medium"
+            >
+              No activity!
+            </motion.li>
+          )}
+        </AnimatePresence>
         <InView
           fallbackInView
           onChange={async (InView) => {
@@ -87,23 +116,28 @@ const ActivityUser = (props: ActivityUserProps) => {
         >
           {({ ref }) => (
             <li ref={ref} className="mt-4 w-full">
-              {isFetchingNextPage &&
-                Array.from(Array(4), (_, i) => (
-                  <li
-                    key={`activity-skeleton-${i}`}
-                    className="flex w-full animate-pulse items-center gap-2 px-2"
-                  >
-                    <div className="size-14 rounded-full bg-secondary"></div>
-                    <div className="flex flex-col gap-2">
-                      <div className="h-6 w-56 rounded-md bg-secondary"></div>
-                      <div className="h-4 w-28 rounded-md bg-secondary"></div>
-                    </div>
-                  </li>
-                ))}
+              <AnimatePresence>
+                {isFetchingNextPage &&
+                  Array.from({ length: 4 }, (_, i) => (
+                    <motion.div
+                      key={`activity-fetching-skeleton-${i}`}
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      className="flex w-full animate-pulse items-center gap-2 px-2"
+                    >
+                      <div className="bg-secondary size-14 rounded-full"></div>
+                      <div className="flex flex-col gap-2">
+                        <div className="bg-secondary h-6 w-56 rounded-md"></div>
+                        <div className="bg-secondary h-4 w-28 rounded-md"></div>
+                      </div>
+                    </motion.div>
+                  ))}
+              </AnimatePresence>
             </li>
           )}
         </InView>
-      </ul>
+      </motion.ul>
     </div>
   )
 }
@@ -211,23 +245,23 @@ const Activity = (props: ActivityProps) => {
 }
 
 const FollowUserIcon = () => (
-  <div className="absolute -bottom-2 right-0 rounded-full bg-primary p-1 text-sm text-white">
+  <div className="bg-primary absolute right-0 -bottom-2 rounded-full p-1 text-sm text-white">
     <IoPersonOutline />
   </div>
 )
 const LikeIcon = () => (
-  <div className="absolute -bottom-2 right-0 rounded-full bg-primary p-1 text-sm text-white">
+  <div className="bg-primary absolute right-0 -bottom-2 rounded-full p-1 text-sm text-white">
     <SlLike />
   </div>
 )
 
 const CommentLikeIcon = () => (
-  <div className="absolute -bottom-2 right-0 rounded-full bg-primary p-1 text-sm text-white">
+  <div className="bg-primary absolute right-0 -bottom-2 rounded-full p-1 text-sm text-white">
     <FaRegComment />
   </div>
 )
 const ReplyLikeIcon = () => (
-  <div className="absolute -bottom-2 right-0 rounded-full bg-primary p-1 text-sm text-white">
+  <div className="bg-primary absolute right-0 -bottom-2 rounded-full p-1 text-sm text-white">
     <BsReplyAll />
   </div>
 )
@@ -272,7 +306,7 @@ const ActivityCard = (props: ActivityCardProps) => {
       </div>
       <div>
         {children}
-        <span className="text-sm text-muted-foreground/80">4hours ago</span>
+        <span className="text-muted-foreground/80 text-sm">4hours ago</span>
       </div>
     </div>
   )
