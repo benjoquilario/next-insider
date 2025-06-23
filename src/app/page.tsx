@@ -1,19 +1,20 @@
-import { getUser } from "@/lib/user"
-import { redirect } from "next/navigation"
 import Layout from "@/components/layout"
 import Section from "@/components/section"
 import Link from "next/link"
 import Posts from "@/components/posts"
 import CreateButton from "@/components/posts/create-button"
 import ThemeToggle from "@/components/theme-toggle"
+import { Metadata } from "next"
 
-const Home = async () => {
-  const user = await getUser()
+export const metadata: Metadata = {
+  title: "Home",
+  description: `A Fullstack social media application intended to make a community, friends, and make the world more open and connected.`,
+  alternates: {
+    canonical: "/",
+  },
+}
 
-  if (!user) {
-    redirect("/login")
-  }
-
+const Home = () => {
   return (
     <Layout>
       <Section>

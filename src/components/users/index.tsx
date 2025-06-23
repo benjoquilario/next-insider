@@ -1,6 +1,6 @@
 "use client"
 
-import type { User } from "@prisma/client"
+import type { User } from "@/generated/prisma"
 import * as React from "react"
 import UserItem from "./user-item"
 import { ScrollArea } from "../ui/scroll-area"
@@ -30,17 +30,17 @@ const Users = ({ usersPromise }: { usersPromise: Promise<IUsers[]> }) => {
         <aside className="overflow-hidden rounded-md border shadow">
           <h2 className="px-5 py-3 text-sm font-semibold">Trends this week</h2>
           <a className="block" href="/tag/trpc">
-            <div className="cursor-pointer px-5 py-3 hover:bg-secondary">
+            <div className="hover:bg-secondary cursor-pointer px-5 py-3">
               <p className="mb-2 text-sm font-semibold">#nextjs</p>
-              <p className="text-xs font-medium text-muted-foreground/80">
+              <p className="text-muted-foreground/80 text-xs font-medium">
                 10 posts
               </p>
             </div>
           </a>
           <a className="block" href="/tag/trpc">
-            <div className="cursor-pointer px-5 py-3 hover:bg-secondary">
+            <div className="hover:bg-secondary cursor-pointer px-5 py-3">
               <p className="mb-2 text-sm font-semibold">#postgrel</p>
-              <p className="text-xs font-medium text-muted-foreground/80">
+              <p className="text-muted-foreground/80 text-xs font-medium">
                 4 posts
               </p>
             </div>
@@ -48,7 +48,7 @@ const Users = ({ usersPromise }: { usersPromise: Promise<IUsers[]> }) => {
         </aside>
         <aside className="mt-2">
           <div className="flex w-full flex-col justify-center rounded-xl border py-3">
-            <p className="text-md text-center font-bold text-foreground/90">
+            <p className="text-md text-foreground/90 text-center font-bold">
               Who to follow
             </p>
             <ScrollArea className="h-fit w-full px-2">

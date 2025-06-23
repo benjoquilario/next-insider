@@ -5,7 +5,7 @@ import { useInfiniteQuery } from "@tanstack/react-query"
 import { motion, AnimatePresence } from "framer-motion"
 import { LoaderCircle } from "lucide-react"
 import { type Comment } from "@/types"
-import { type User } from "@prisma/client"
+import { type User } from "@/generated/prisma"
 import { Button } from "@/components/ui/button"
 import CommentItem from "./comment-item"
 import CreateComment from "./create-comment"
@@ -32,7 +32,9 @@ const ViewComments = ({ postId }: ViewCommentsProps) => {
   } = useInfiniteQuery({
     queryKey: ["comments", postId],
     queryFn: ({ pageParam }) =>
-      fetch(`/api/comments/${postId}?limit=3&cursor=${pageParam}`).then((res) => res.json()),
+      fetch(`/api/comments/${postId}?limit=3&cursor=${pageParam}`).then((res) =>
+        res.json()
+      ),
     initialPageParam: 0,
     getNextPageParam: (lastPage) => lastPage.nextSkip,
     refetchOnWindowFocus: false,
@@ -54,7 +56,7 @@ const ViewComments = ({ postId }: ViewCommentsProps) => {
 
   if (isError) {
     return (
-      <div className="flex items-center justify-center py-4 text-destructive">
+      <div className="text-destructive flex items-center justify-center py-4">
         Failed to load comments.
       </div>
     )
@@ -70,7 +72,7 @@ const ViewComments = ({ postId }: ViewCommentsProps) => {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="py-4 text-center text-muted-foreground"
+              className="text-muted-foreground py-4 text-center"
             >
               No comments yet.
             </motion.li>
@@ -82,7 +84,11 @@ const ViewComments = ({ postId }: ViewCommentsProps) => {
               initial="hidden"
               animate="visible"
               exit="exit"
-              transition={{ duration: 0.25, delay: idx * 0.05, ease: "easeInOut" }}
+              transition={{
+                duration: 0.25,
+                delay: idx * 0.05,
+                ease: "easeInOut",
+              }}
             >
               <CommentItem comment={comment} postId={postId} />
             </motion.li>
@@ -90,7 +96,7 @@ const ViewComments = ({ postId }: ViewCommentsProps) => {
         </AnimatePresence>
         {isFetchingNextPage && (
           <div className="flex items-center justify-center py-4">
-            <LoaderCircle className="animate-spin text-2xl text-foreground" />
+            <LoaderCircle className="text-foreground animate-spin text-2xl" />
           </div>
         )}
         {!isFetchingNextPage && hasNextPage && (

@@ -2,7 +2,7 @@
 
 import React from "react"
 import type { Comment } from "@/types"
-import { User } from "@prisma/client"
+import { User } from "@/generated/prisma"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import { IoMdHeart } from "react-icons/io"
@@ -47,11 +47,13 @@ const CommentItem = React.memo(({ comment, postId }: CommentItemProps) => {
 
   const { comment: commentText, commentId } = selectedComment
 
-  const { likeCommentMutation, unlikeCommentMutation } = useLikeCommentMutation({
-    postId,
-    commentId: comment.id,
-    content: comment.comment,
-  })
+  const { likeCommentMutation, unlikeCommentMutation } = useLikeCommentMutation(
+    {
+      postId,
+      commentId: comment.id,
+      content: comment.comment,
+    }
+  )
 
   const handleAlertOpen = React.useCallback(() => {
     setIsAlertOpen(true)
@@ -98,12 +100,12 @@ const CommentItem = React.memo(({ comment, postId }: CommentItemProps) => {
       animate="visible"
       exit="exit"
       transition={{ duration: 0.25, ease: "easeInOut" }}
-      className="relative flex pl-4 pt-1"
+      className="relative flex pt-1 pl-4"
     >
       {/* Avatar and reply line */}
-      <div className="relative mr-2 mt-1 block rounded-full">
+      <div className="relative mt-1 mr-2 block rounded-full">
         {comment.haveReplies || isRepliesOpen ? (
-          <div className="absolute left-[18px] top-[30px] h-[calc(100%_-_61px)] w-[2px] bg-input"></div>
+          <div className="bg-input absolute top-[30px] left-[18px] h-[calc(100%_-_61px)] w-[2px]"></div>
         ) : null}
         <Link
           href={`/profile/${user.id}`}
@@ -116,7 +118,7 @@ const CommentItem = React.memo(({ comment, postId }: CommentItemProps) => {
               className="size-8"
             />
             <AvatarFallback>
-              <div className="size-full animate-pulse bg-primary/10"></div>
+              <div className="bg-primary/10 size-full animate-pulse"></div>
             </AvatarFallback>
           </Avatar>
           <div className="pointer-events-none absolute inset-0 rounded-full"></div>
@@ -125,17 +127,17 @@ const CommentItem = React.memo(({ comment, postId }: CommentItemProps) => {
       {/* Main comment content */}
       <div className="grow basis-0 pr-2 md:mr-10 md:pr-4">
         <div>
-          <div className="max-w-[calc(100%_-_26px] inline-block w-full break-words">
+          <div className="inline-block w-full max-w-[calc(100%_-_26px] break-words">
             <div className="flex w-full items-center justify-between">
               <span className="inline-flex flex-col">
                 <Link className="inline" href={`/profile/${user.id}`}>
                   <span className="inline-flex">
-                    <span className="max-w-full text-sm font-medium capitalize text-foreground underline-offset-1 hover:underline">
+                    <span className="text-foreground max-w-full text-sm font-medium capitalize underline-offset-1 hover:underline">
                       {user?.name}
                     </span>
                   </span>
                 </Link>
-                <span className="text-[11px] text-foreground/70">
+                <span className="text-foreground/70 text-[11px]">
                   {dayjs(createdAt).fromNow()}
                 </span>
               </span>
@@ -159,7 +161,7 @@ const CommentItem = React.memo(({ comment, postId }: CommentItemProps) => {
             ) : (
               <div className="relative my-1.5 inline-flex w-full align-middle">
                 <div className="base-[auto] w-full min-w-0 shrink grow">
-                  <div className="relative inline-block max-w-full whitespace-normal break-words rounded text-foreground">
+                  <div className="text-foreground relative inline-block max-w-full rounded break-words whitespace-normal">
                     <div>
                       <div className="block py-[4px]">
                         <span className="break-words">
@@ -175,8 +177,11 @@ const CommentItem = React.memo(({ comment, postId }: CommentItemProps) => {
                 </div>
               </div>
             )}
-            <div className="ml-1 mt-1 flex items-center gap-2 text-xs font-semibold text-muted-foreground/70">
-              <LikeComment handleLikeComment={handleLikeComment} isLiked={isLiked} />
+            <div className="text-muted-foreground/70 mt-1 ml-1 flex items-center gap-2 text-xs font-semibold">
+              <LikeComment
+                handleLikeComment={handleLikeComment}
+                isLiked={isLiked}
+              />
               <button
                 type="button"
                 onClick={handleOpenReplies}
@@ -185,17 +190,17 @@ const CommentItem = React.memo(({ comment, postId }: CommentItemProps) => {
                 Reply
               </button>
               {isEdited ? (
-                <span className="text-xs font-light text-muted-foreground/60">
+                <span className="text-muted-foreground/60 text-xs font-light">
                   Edited
                 </span>
               ) : null}
-              <div className="relative flex items-center gap-1 rounded-full bg-background px-1 shadow">
+              <div className="bg-background relative flex items-center gap-1 rounded-full px-1 shadow">
                 {isLiked || _count.commentLike > 0 ? (
                   <>
-                    <div className="flex size-4 items-center justify-center rounded-full bg-primary">
+                    <div className="bg-primary flex size-4 items-center justify-center rounded-full">
                       <IoMdHeart size={12} className="text-white" />
                     </div>
-                    <span className="text-sm font-medium text-foreground/70">
+                    <span className="text-foreground/70 text-sm font-medium">
                       {_count.commentLike}
                     </span>
                   </>
@@ -205,7 +210,7 @@ const CommentItem = React.memo(({ comment, postId }: CommentItemProps) => {
             <div className="relative mt-2">
               {haveReplies ? (
                 <>
-                  <div className="absolute bottom-[12px] left-[-22px] h-[21px] w-[29px] rounded-l border-b-2 border-l-2 border-l-input border-t-input md:w-[27px]"></div>
+                  <div className="border-l-input border-t-input absolute bottom-[12px] left-[-22px] h-[21px] w-[29px] rounded-l border-b-2 border-l-2 md:w-[27px]"></div>
                   <Button
                     variant="ghost"
                     onClick={handleOpenReplies}

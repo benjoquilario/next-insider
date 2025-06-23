@@ -6,11 +6,8 @@ import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar"
 
 import { Button } from "@/components/ui/button"
 import { IoMdShareAlt } from "react-icons/io"
-import { IoMdHeart } from "react-icons/io"
 import type { IPost } from "@/types"
 // import type { User } from "@prisma/client"
-import { useUnlikeMutation } from "@/hooks/mutation/posts/use-unlike-post"
-import { useLikePostMutation } from "@/hooks/mutation/posts/use-like-post"
 import LikePost from "./like/like-post"
 import Comments from "./comments"
 import { MessageCircle } from "lucide-react"
@@ -20,7 +17,7 @@ import dayjs from "@/lib/time"
 import usePostStore from "@/store/post"
 import DeleteDialog from "./delete-dialog"
 import { useDeletePost } from "@/hooks/mutation/posts/use-delete-post"
-import { type User } from "@prisma/client"
+import { type User } from "@/generated/prisma"
 import * as React from "react"
 import { motion, AnimatePresence } from "framer-motion"
 
@@ -122,7 +119,7 @@ const PostItem = React.memo(
           <Link
             href={`/profile/`}
             className={cn(
-              "focus-visible:outline-offset-3 rounded-full ring-primary ring-offset-1 focus-visible:outline-primary focus-visible:ring-primary active:ring"
+              "ring-primary focus-visible:outline-primary focus-visible:ring-primary rounded-full ring-offset-1 focus-visible:outline-offset-3 active:ring"
             )}
           >
             <Avatar>
@@ -140,14 +137,14 @@ const PostItem = React.memo(
               <Link
                 href={`/profile/`}
                 className={cn(
-                  "block text-[15px] font-bold capitalize text-foreground/60 underline-offset-1 hover:underline"
+                  "text-foreground/60 block text-[15px] font-bold capitalize underline-offset-1 hover:underline"
                 )}
               >
                 {post.user.name}
               </Link>
             </div>
 
-            <span className="text-[13px] text-muted-foreground/80">
+            <span className="text-muted-foreground/80 text-[13px]">
               {dayjs(post.createdAt).fromNow()}
             </span>
           </div>
@@ -162,7 +159,7 @@ const PostItem = React.memo(
         <div className="px-3 font-normal md:px-5">
           <span
             className={cn(
-              "break-words text-base text-foreground/80",
+              "text-foreground/80 text-base break-words",
               havePhoto ? "text-base" : "text-2xl"
             )}
           >
@@ -174,12 +171,12 @@ const PostItem = React.memo(
         </div>
 
         <div className="mt-2 flex items-center justify-between px-5">
-          <div className="flex gap-1 text-sm font-semibold text-muted-foreground/80">
+          <div className="text-muted-foreground/80 flex gap-1 text-sm font-semibold">
             <span>{post._count.comment}</span>
             <MessageCircle aria-hidden size={20} />
           </div>
         </div>
-        <ul className="rou mx-1 mt-1 flex justify-between rounded-t-md border-t border-l-secondary/40 font-light">
+        <ul className="rou border-l-secondary/40 mx-1 mt-1 flex justify-between rounded-t-md border-t font-light">
           <li className="w-full flex-1 py-1">
             <LikePost
               isLiked={post.isLiked}
@@ -194,15 +191,15 @@ const PostItem = React.memo(
               onClick={handleOpenComment}
               variant="ghost"
               className={cn(
-                "flex h-[35px] w-full items-center justify-center gap-1 text-foreground/60 hover:bg-secondary",
-                "focus-visible:outline-offset-2 focus-visible:outline-primary focus-visible:ring-primary",
+                "text-foreground/60 hover:bg-secondary flex h-[35px] w-full items-center justify-center gap-1",
+                "focus-visible:outline-primary focus-visible:ring-primary focus-visible:outline-offset-2",
                 isCommentOpen && "bg-secondary"
               )}
               aria-label="Leave a Comment"
             >
               <MessageCircle
                 aria-hidden="true"
-                className="size-5 text-foreground/90"
+                className="text-foreground/90 size-5"
               />
               <span className="text-foreground-80 text-sm font-semibold">
                 Comment
@@ -215,8 +212,8 @@ const PostItem = React.memo(
               type="button"
               aria-label="Share a post"
               className={cn(
-                "flex h-[35px] w-full items-center justify-center gap-1 rounded-md text-foreground/60 hover:bg-secondary",
-                "focus-visible:outline-offset-2 focus-visible:outline-primary focus-visible:ring-primary"
+                "text-foreground/60 hover:bg-secondary flex h-[35px] w-full items-center justify-center gap-1 rounded-md",
+                "focus-visible:outline-primary focus-visible:ring-primary focus-visible:outline-offset-2"
               )}
             >
               <IoMdShareAlt
@@ -224,7 +221,7 @@ const PostItem = React.memo(
                 size={20}
                 className="text-foreground/90"
               />
-              <span className="text-sm font-semibold text-foreground/80">
+              <span className="text-foreground/80 text-sm font-semibold">
                 Share
               </span>
             </Button>

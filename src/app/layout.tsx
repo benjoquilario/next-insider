@@ -21,7 +21,13 @@ const geistMono = Geist_Mono({
 })
 
 export const metadata: Metadata = {
-  title: "Insider",
+  title: {
+    default: "Insider",
+    template: `%s - Insider`,
+  },
+  alternates: {
+    canonical: "/",
+  },
   description:
     "A Fullstack social media application intended to make a community, friends, and make the world more open and connected.",
 }

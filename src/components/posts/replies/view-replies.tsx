@@ -4,7 +4,7 @@ import React from "react"
 import ReplyItem from "./replies-item"
 import { useInfiniteQuery } from "@tanstack/react-query"
 import { motion } from "framer-motion"
-import type { User } from "@prisma/client"
+import type { User } from "@/generated/prisma"
 import { ImSpinner8 } from "react-icons/im"
 import { Button } from "@/components/ui/button"
 import { type ReplyComment } from "@/types"
@@ -55,7 +55,7 @@ const ViewReplies = ({ commentId }: ViewRepliesProps) => {
         )}
         {isFetchingNextPage && (
           <div className="flex items-center justify-center py-4">
-            <ImSpinner8 className="animate-spin text-2xl text-foreground" />
+            <ImSpinner8 className="text-foreground animate-spin text-2xl" />
           </div>
         )}
         {!isFetchingNextPage && hasNextPage && (

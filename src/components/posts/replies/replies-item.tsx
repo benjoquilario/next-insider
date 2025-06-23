@@ -4,7 +4,7 @@ import Link from "next/link"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { IoMdHeart } from "react-icons/io"
 import { type ReplyComment } from "@/types"
-import { type User } from "@prisma/client"
+import { type User } from "@/generated/prisma"
 import dayjs from "@/lib/time"
 import EditReplies from "./edit-replies"
 import useRepliesStore from "@/store/replies"
@@ -79,12 +79,12 @@ const RepliesItem = ({ replies, commentId }: RepliesItemProps) => {
 
   return (
     <>
-      <div className="relative flex pl-4 pt-1">
-        <div className="relative mr-2 mt-1 block rounded-full">
+      <div className="relative flex pt-1 pl-4">
+        <div className="relative mt-1 mr-2 block rounded-full">
           {/* {isReplyOpen || comment._count.reply > 0 ? (
             <div className="absolute left-[18px] top-[30px] h-[calc(100%_-_61px)] w-[2px] bg-gray-300"></div>
           ) : null} */}
-          <div className="absolute left-[-38px] top-[15px] h-[2px] w-[45px] bg-input"></div>
+          <div className="bg-input absolute top-[15px] left-[-38px] h-[2px] w-[45px]"></div>
           <span className="inline">
             <Link
               href={`/profile/`}
@@ -98,7 +98,7 @@ const RepliesItem = ({ replies, commentId }: RepliesItemProps) => {
                   className="size-6"
                 />
                 <AvatarFallback>
-                  <div className="size-full animate-pulse bg-primary/10"></div>
+                  <div className="bg-primary/10 size-full animate-pulse"></div>
                 </AvatarFallback>
               </Avatar>
               <div className="pointer-events-none absolute inset-0 rounded-full"></div>
@@ -109,7 +109,7 @@ const RepliesItem = ({ replies, commentId }: RepliesItemProps) => {
         <div className="grow basis-0 overflow-hidden pr-2 md:pr-4">
           <div>
             <div
-              className="max-w-[calc(100%_-_26px] inline-block w-full break-words"
+              className="inline-block w-full max-w-[calc(100%_-_26px] break-words"
               style={{ wordBreak: "break-word" }}
             >
               <div className="flex w-full items-center justify-between">
@@ -117,14 +117,14 @@ const RepliesItem = ({ replies, commentId }: RepliesItemProps) => {
                   <Link className="inline" href={`/profile/${userId}`}>
                     <span className="inlin````e-flex">
                       <span
-                        className="max-w-full text-sm font-medium capitalize text-foreground underline-offset-1 hover:underline"
+                        className="text-foreground max-w-full text-sm font-medium capitalize underline-offset-1 hover:underline"
                         style={{ wordBreak: "break-word" }}
                       >
                         {user?.name}
                       </span>
                     </span>
                   </Link>
-                  <span className="text-[11px] text-foreground/70">
+                  <span className="text-foreground/70 text-[11px]">
                     {dayjs(createdAt).fromNow(true)}
                   </span>
                 </span>
@@ -150,7 +150,7 @@ const RepliesItem = ({ replies, commentId }: RepliesItemProps) => {
                   <div className="relative my-1.5 inline-flex w-full align-middle">
                     <div className="base-[auto] w-full min-w-0 shrink grow">
                       <div
-                        className="relative inline-block max-w-full whitespace-normal break-words rounded text-foreground"
+                        className="text-foreground relative inline-block max-w-full rounded break-words whitespace-normal"
                         style={{ wordBreak: "break-word" }}
                       >
                         <div>
@@ -179,25 +179,25 @@ const RepliesItem = ({ replies, commentId }: RepliesItemProps) => {
                 </>
               )}
 
-              <div className="ml-1 mt-1 flex items-center gap-2 text-xs font-semibold text-muted-foreground/70">
+              <div className="text-muted-foreground/70 mt-1 ml-1 flex items-center gap-2 text-xs font-semibold">
                 <LikeComment
                   handleLikeComment={handleLikeComment}
                   isLiked={isLiked}
                 />
                 {isEdited ? (
-                  <span className="text-xs font-light text-muted-foreground/60">
+                  <span className="text-muted-foreground/60 text-xs font-light">
                     Edited
                   </span>
                 ) : null}
 
-                <div className="relative flex items-center gap-1 rounded-full bg-background px-1 shadow">
+                <div className="bg-background relative flex items-center gap-1 rounded-full px-1 shadow">
                   {isLiked || _count.likeReplyComment > 0 ? (
                     <>
-                      <div className="flex size-4 items-center justify-center rounded-full bg-primary">
+                      <div className="bg-primary flex size-4 items-center justify-center rounded-full">
                         <IoMdHeart size={12} className="text-white" />
                       </div>
 
-                      <span className="text-sm font-medium text-foreground/70">
+                      <span className="text-foreground/70 text-sm font-medium">
                         {_count.likeReplyComment}
                       </span>
                     </>
@@ -207,7 +207,7 @@ const RepliesItem = ({ replies, commentId }: RepliesItemProps) => {
             </div>
           </div>
         </div>
-        <div className="absolute right-0 top-0 h-0 w-1/2"></div>
+        <div className="absolute top-0 right-0 h-0 w-1/2"></div>
       </div>
 
       <DeleteDialog
