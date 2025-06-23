@@ -28,6 +28,8 @@ const CoverPhoto = ({
     }
   }
 
+  console.log(cover)
+
   return (
     <div className="relative h-56 w-full overflow-hidden">
       <div className="relative size-full">
@@ -45,7 +47,7 @@ const CoverPhoto = ({
             maxFileCount={4}
             maxSize={4 * 1024 * 1024}
             isCover
-            className="absolute bottom-3 right-3 flex size-8 items-center justify-center gap-1 rounded-full px-1 text-foreground md:w-32 md:rounded-md"
+            className="text-foreground absolute right-3 bottom-3 flex size-8 items-center justify-center gap-1 rounded-full px-1 md:w-32 md:rounded-md"
           />
         ) : null}
       </div>
