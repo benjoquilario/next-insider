@@ -6,6 +6,7 @@
 
 generator client {
   provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
 }
 
 datasource db {
@@ -42,9 +43,12 @@ model User {
   comments        Comment[]
   likePosts       LikePost[]
   activities      Activity[]    @relation("activity")
-  notifications    Activity[]   @relation("notification")
+  activityNotifications Activity[]   @relation("activityNotifications")
+  sentNotifications Notification[]  @relation("NotificationFromUser")
   followers       Follow[]      @relation("following")
   following       Follow[]      @relation("follower")
+
+  notifications    Notification[]   @relation("UserNotifications")
 }
 
 model Account {
@@ -104,6 +108,8 @@ model Post {
   userId        String
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
+
+  notifications Notification[]
 }
 
 model LikePost {
@@ -136,6 +142,8 @@ model Comment {
   post         Post        @relation(fields: [postId], references: [id], onDelete: Cascade)
   userId       String
   user         User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  notifications Notification[]
 }
 
 model CommentLike {
@@ -162,6 +170,8 @@ model ReplyComment {
 
   userId          String
   user            User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  notifications Notification[]
 }
 
 
@@ -181,7 +191,7 @@ model Activity {
   id            String          @id @default(cuid())
   createdAt     DateTime        @default(now())
   targetId      String
-  targetUser    User            @relation("notification", fields: [targetId], references: [id], onDelete: Cascade)
+  targetUser    User            @relation("activityNotifications", fields: [targetId], references: [id], onDelete: Cascade)
   type          Activitytype
 
   content       String
@@ -198,6 +208,33 @@ model Follow {
   followingId   String
 
   @@unique([followerId, followingId])
+}
+
+model Notification {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation("UserNotifications", fields: [userId], references: [id], onDelete: Cascade)
+  type        NotificationType
+  message     String?
+  isRead      Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  fromUserId  String?
+  fromUser    User?    @relation("NotificationFromUser", fields: [fromUserId], references: [id])
+  postId      String?
+  post        Post?    @relation(fields: [postId], references: [id])
+  commentId   String?
+  comment     Comment? @relation(fields: [commentId], references: [id])
+  replyId     String?
+  reply       ReplyComment? @relation(fields: [replyId], references: [id])
+}
+
+enum NotificationType {
+  FOLLOW
+  POST_LIKE
+  COMMENT
+  REPLY
+  COMMENT_LIKE
+  REPLY_LIKE
 }
 
 enum Activitytype {
