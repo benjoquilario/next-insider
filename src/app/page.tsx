@@ -20,7 +20,7 @@ const Home = () => {
       <Section>
         <div className="col-span-full lg:col-span-9 xl:col-span-6">
           <div className="mb-1 flex flex-col items-center justify-between p-2">
-            <div className="flex w-full items-center justify-between">
+            <div className="mb-3 flex w-full items-center justify-between">
               <Link href="/">
                 <h1 className="text-3xl font-semibold">Feed</h1>
               </Link>

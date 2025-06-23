@@ -16,7 +16,7 @@ import { LogOut } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 const SignOut = () => {
-  const handleSignOut = async () => {
+  const submit = async () => {
     await signOut()
   }
 
@@ -27,12 +27,12 @@ const SignOut = () => {
           <button
             className={cn(
               "flex w-full items-center justify-center rounded-md p-2 focus:outline-none md:w-auto md:justify-start md:space-x-3 md:px-5 md:py-3",
-              "focus-visible:outline-offset-2 focus-visible:outline-primary",
-              "transition duration-75 hover:bg-primary/40"
+              "focus-visible:outline-primary focus-visible:outline-offset-2",
+              "hover:bg-primary/40 transition duration-75"
             )}
           >
             <LogOut size={29} className="text-primary" />
-            <span className="hidden text-left text-base font-medium capitalize tracking-tight md:block">
+            <span className="hidden text-left text-base font-medium tracking-tight capitalize md:block">
               Logout
             </span>
           </button>
@@ -47,7 +47,7 @@ const SignOut = () => {
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction asChild>
-              <form action={handleSignOut} className="w-full">
+              <form onSubmit={submit} className="w-full">
                 <Button type="submit">Confirm</Button>
               </form>
             </AlertDialogAction>

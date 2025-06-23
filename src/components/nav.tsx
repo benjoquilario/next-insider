@@ -14,7 +14,7 @@ const Nav = () => {
   const className = cn(
     "flex w-full items-center space-x-3 rounded-md px-5 py-3 focus:outline-none",
     "focus-visible:outline-offset-2 focus-visible:outline-primary",
-    "transition duration-75 hover:bg-primary/40"
+    "transition duration-75 hover:bg-primary/10"
   )
 
   return (
@@ -61,11 +61,7 @@ const Nav = () => {
             <Link
               aria-label="my profile"
               href={`/profile/${session?.id}`}
-              className={cn(
-                "flex w-full items-center space-x-3 rounded-md px-5 py-3 focus:outline-none",
-                "focus-visible:outline-primary focus-visible:outline-offset-2",
-                "hover:bg-primary/40 transition duration-75"
-              )}
+              className={cn(className)}
             >
               <User className="text-primary size-6" />
               <span className="text-left text-base font-medium tracking-tight capitalize">
