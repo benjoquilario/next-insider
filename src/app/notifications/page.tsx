@@ -52,10 +52,10 @@ export default function NotificationsPage() {
 
   return (
     <div className="col-span-full lg:col-span-9 xl:col-span-6">
-      <h1 className="text-3xl font-semibold">Feed</h1>
+      <h1 className="text-3xl font-semibold">Notifications</h1>
       <motion.ul
         layout
-        className="flex flex-col gap-3"
+        className="mt-4 flex flex-col gap-3"
         initial="hidden"
         animate="visible"
         variants={{}}
