@@ -43,8 +43,9 @@ const LikePost = ({ isLiked, likeCounts, postId, content }: LikePostProps) => {
     <Button
       type="button"
       className={cn(
-        "text-muted-foreground-600 flex h-[35px] w-full items-center justify-center gap-1 rounded-md hover:bg-secondary active:scale-110",
-        "focus-visible:outline-offset-2 focus-visible:outline-primary focus-visible:ring-primary"
+        "cursor-pointer",
+        "text-muted-foreground-600 hover:bg-secondary flex h-[35px] w-full items-center justify-center gap-1 rounded-md active:scale-110",
+        "focus-visible:outline-primary focus-visible:ring-primary focus-visible:outline-offset-2"
       )}
       variant="ghost"
       aria-label="Like Post"
@@ -52,14 +53,14 @@ const LikePost = ({ isLiked, likeCounts, postId, content }: LikePostProps) => {
     >
       <span
         className={cn(
-          "text-sm flex items-center gap-1",
-          isLikedState ? "font-bold text-primary" : "text-foreground"
+          "flex items-center gap-1 text-sm",
+          isLikedState ? "text-primary font-bold" : "text-foreground"
         )}
       >
         {likeCountsState}
 
         {isLikedState ? (
-          <IoMdHeart aria-hidden="true" className="size-4 text-primary" />
+          <IoMdHeart aria-hidden="true" className="text-primary size-4" />
         ) : (
           <IoMdHeartEmpty aria-hidden="true" className="size-4" />
         )}

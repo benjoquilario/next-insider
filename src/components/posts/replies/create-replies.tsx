@@ -60,7 +60,7 @@ const CreateReplies = ({ commentId }: { commentId: string }) => {
     <div className="flex flex-row items-center space-x-2">
       <div className="-mt-1">
         <div className="relative mt-2">
-          <div className="absolute bottom-[12px] left-[-34px] top-0 h-[21px] w-[57px] rounded-l border-b-2 border-l-2 border-l-input border-t-input md:left-[-42px]"></div>
+          <div className="border-l-input border-t-input absolute top-0 bottom-[12px] left-[-40px] h-[21px] w-[57px] rounded-l border-b-2 border-l-2 md:left-[-48px]"></div>
 
           <Link
             href={`/profile/`}
@@ -74,7 +74,7 @@ const CreateReplies = ({ commentId }: { commentId: string }) => {
                 className="size-8"
               />
               <AvatarFallback>
-                <div className="size-full animate-pulse bg-primary/10"></div>
+                <div className="bg-primary/10 size-full animate-pulse"></div>
               </AvatarFallback>
             </Avatar>
             <div className="pointer-events-none absolute inset-0 rounded-full"></div>
@@ -117,7 +117,7 @@ const CreateReplies = ({ commentId }: { commentId: string }) => {
                   ref={buttonRef}
                   disabled={form.formState.isSubmitting}
                   type="submit"
-                  className="absolute bottom-6 right-4 text-xl text-primary"
+                  className="text-primary absolute right-4 bottom-6 text-xl"
                 >
                   <IoMdSend />
                 </button>
