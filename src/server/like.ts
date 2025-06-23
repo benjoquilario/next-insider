@@ -2,6 +2,8 @@
 
 import { getUser } from "@/lib/user"
 import db from "@/lib/db"
+import { headers } from "next/headers"
+import { ratelimit } from "@/lib/redis"
 
 export const likePost = async ({
   postId,
@@ -10,11 +12,22 @@ export const likePost = async ({
   postId: string
   content: string
 }) => {
+  const ip = (await headers()).get("x-forwarded-for")
   const session = await getUser()
 
   if (!session) return
 
   const userId = session.id
+
+  const { success } = await ratelimit.limit(`${ip}`)
+
+  if (!success) {
+    return {
+      ok: false,
+      message:
+        "Yo! Calm down cowboy, you are commenting too fast! take a few breath and calm down",
+    }
+  }
 
   const isLiked = await db.likePost.count({
     where: {
@@ -61,10 +74,21 @@ export const likePost = async ({
 }
 
 export const unlikePost = async ({ postId }: { postId: string }) => {
+  const ip = (await headers()).get("x-forwarded-for")
   const session = await getUser()
 
   if (!session) return
   const userId = session.id
+
+  const { success } = await ratelimit.limit(`${ip}`)
+
+  if (!success) {
+    return {
+      ok: false,
+      message:
+        "Yo! Calm down cowboy, you are commenting too fast! take a few breath and calm down",
+    }
+  }
 
   const isLiked = await db.likePost.count({
     where: {
@@ -106,6 +130,18 @@ export const likeComment = async ({
   const session = await getUser()
 
   if (!session) return
+
+  const ip = (await headers()).get("x-forwarded-for")
+
+  const { success } = await ratelimit.limit(`${ip}`)
+
+  if (!success) {
+    return {
+      ok: false,
+      message:
+        "Yo! Calm down cowboy, you are commenting too fast! take a few breath and calm down",
+    }
+  }
 
   const userId = session.id
 
@@ -155,6 +191,17 @@ export const likeComment = async ({
 
 export const unlikeComment = async ({ commentId }: { commentId: string }) => {
   const session = await getUser()
+  const ip = (await headers()).get("x-forwarded-for")
+
+  const { success } = await ratelimit.limit(`${ip}`)
+
+  if (!success) {
+    return {
+      ok: false,
+      message:
+        "Yo! Calm down cowboy, you are commenting too fast! take a few breath and calm down",
+    }
+  }
 
   if (!session) return
   const userId = session.id
@@ -201,6 +248,18 @@ export const likeReplyComment = async ({
   if (!session) return
   const userId = session.id
 
+  const ip = (await headers()).get("x-forwarded-for")
+
+  const { success } = await ratelimit.limit(`${ip}`)
+
+  if (!success) {
+    return {
+      ok: false,
+      message:
+        "Yo! Calm down cowboy, you are commenting too fast! take a few breath and calm down",
+    }
+  }
+
   const isLiked = await db.likeReplyComment.count({
     where: {
       userId,
@@ -211,7 +270,7 @@ export const likeReplyComment = async ({
   if (isLiked) {
     return {
       ok: false,
-      status: 409,
+      message: "Already liked this reply",
     }
   }
 
@@ -252,7 +311,17 @@ export const unlikeReplyComment = async ({ replyId }: { replyId: string }) => {
 
   const userId = session.id
 
-  console.log(session)
+  const ip = (await headers()).get("x-forwarded-for")
+
+  const { success } = await ratelimit.limit(`${ip}`)
+
+  if (!success) {
+    return {
+      ok: false,
+      message:
+        "Yo! Calm down cowboy, you are commenting too fast! take a few breath and calm down",
+    }
+  }
 
   const isLiked = await db.likeReplyComment.count({
     where: {

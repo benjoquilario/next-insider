@@ -9,67 +9,48 @@ import { createPost } from "@/server/post"
 import type { User } from "@prisma/client"
 import type { CreatePost, IPage, IPost } from "@/types"
 
+// Helper to update the posts cache with the new post at the top of the first page
+function updatePostsCache(
+  oldData: InfiniteData<IPage<IPost<User>[]>> | undefined,
+  newPost: any
+): InfiniteData<IPage<IPost<User>[]>> | undefined {
+  if (!oldData || !newPost?.data) return oldData
+  return {
+    ...oldData,
+    pages: oldData.pages.map((page, idx) =>
+      idx === 0 ? { ...page, data: [newPost.data, ...(page.data ?? [])] } : page
+    ),
+  }
+}
+
 export function useCreatePostMutation(userId?: string) {
   const queryClient = useQueryClient()
-  const queryKey = ["posts"]
+  // Use a dynamic query key based on userId if user create post in his profile
+  // Otherwise, use a generic key for all posts
+  // This allows us to update the cache correctly based on the context
+  const postsQueryKey = userId ? ["posts", userId] : ["posts"]
 
   const writePostMutation = useMutation({
-    mutationFn: (post: CreatePost) => createPost(post),
-    onSuccess: (newPost) => {
-      if (userId) {
-        queryClient.setQueryData<InfiniteData<IPage<IPost<User>[]>>>(
-          ["posts", userId],
-          (oldData) => {
-            if (!oldData) return
+    mutationFn: async (post: CreatePost) => {
+      const res = await createPost(post)
 
-            const newPosts = {
-              ...oldData,
-              pages: oldData.pages.map((page, index) => {
-                if (index === 0) {
-                  return {
-                    ...page,
-                    data: [
-                      newPost?.data,
-                      ...(page.data ? page.data : new Array()),
-                    ],
-                  }
-                }
+      if (!res.ok) {
+        throw new Error(res.message)
+      }
 
-                return page
-              }),
-            }
-
-            return newPosts
-          }
-        )
-      } else
-        queryClient.setQueryData<InfiniteData<IPage<IPost<User>[]>>>(
-          queryKey,
-          (oldData) => {
-            if (!oldData) return
-
-            const newPosts = {
-              ...oldData,
-              pages: oldData.pages.map((page, index) => {
-                if (index === 0) {
-                  return {
-                    ...page,
-                    data: [
-                      newPost?.data,
-                      ...(page.data ? page.data : new Array()),
-                    ],
-                  }
-                }
-
-                return page
-              }),
-            }
-
-            return newPosts
-          }
-        )
+      return res
     },
-    onSettled: () => queryClient.invalidateQueries({ queryKey }),
+    onSuccess: (newPost) => {
+      if (!newPost?.data) return
+      queryClient.setQueryData<InfiniteData<IPage<IPost<User>[]>>>(
+        postsQueryKey,
+        (oldData) => updatePostsCache(oldData, newPost)
+      )
+    },
+    onSettled: () => {
+      // Invalidate to refetch and sync with server
+      queryClient.invalidateQueries({ queryKey: postsQueryKey })
+    },
   })
 
   return { writePostMutation }

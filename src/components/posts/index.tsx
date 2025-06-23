@@ -11,6 +11,12 @@ import PostSkeleton from "../skeleton/post-skeleton"
 import { type IPost } from "@/types"
 import { type User } from "@prisma/client"
 
+const postVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: { opacity: 1, y: 0 },
+  exit: { opacity: 0, y: -20 },
+}
+
 const Posts = () => {
   const {
     data: posts,
@@ -22,9 +28,7 @@ const Posts = () => {
     queryKey: ["posts"],
     queryFn: async ({ pageParam }) => {
       const res = await fetch(`/api/posts?cursor=${pageParam}&limit=${3}`)
-
       const data = await res.json()
-
       return data
     },
     initialPageParam: 0,
@@ -32,49 +36,77 @@ const Posts = () => {
     refetchOnWindowFocus: false,
   })
 
+  // Flatten posts for easier mapping
+  const allPosts = React.useMemo(
+    () => posts?.pages.flatMap((page) => page?.data || []) || [],
+    [posts]
+  )
+
   return (
-    <ul className="w-full space-y-3">
+    <motion.ul
+      className="w-full space-y-3"
+      initial="hidden"
+      animate="visible"
+      exit="exit"
+      variants={{}}
+    >
       <AnimatePresence>
         {isPending
-          ? Array.from(Array(2), (_, i) => (
-              <PostSkeleton key={`post-${i}-skeleton`} />
+          ? Array.from({ length: 2 }, (_, i) => (
+              <li key={`post-${i}-skeleton`}>
+                <PostSkeleton />
+              </li>
             ))
-          : posts?.pages.map((page) =>
-              page?.data.map((post: IPost<User>) => (
-                <motion.li
-                  key={post.id}
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  className="relative z-10 flex flex-col gap-1 overflow-hidden rounded-md border shadow"
-                >
-                  <PostItem
-                    key={post.id}
-                    // will be removed once the query is fixed
-                    post={post}
-                    havePhoto={post.selectedFile.length !== 0}
-                    isUserPost={post.isUserPost}
-                  />
-                </motion.li>
-              ))
-            )}
-        <InView
-          fallbackInView
-          onChange={async (InView) => {
-            if (InView && hasNextPage && !isFetchingNextPage) {
-              await fetchNextPage()
-            }
-          }}
-        >
-          {({ ref }) => (
-            <li ref={ref} className="mt-4 w-full">
-              {isFetchingNextPage &&
-                Array.from(Array(2), (_, i) => <PostSkeleton key={i + 2} />)}
-            </li>
-          )}
-        </InView>
+          : allPosts.map((post: IPost<User>, idx) => (
+              <motion.li
+                key={post.id}
+                variants={postVariants}
+                initial="hidden"
+                animate="visible"
+                exit="exit"
+                transition={{
+                  duration: 0.35,
+                  delay: idx * 0.07,
+                  ease: "easeInOut",
+                }}
+                className="relative z-10 flex flex-col gap-1 overflow-hidden rounded-md border shadow"
+              >
+                <PostItem
+                  post={post}
+                  havePhoto={post.selectedFile.length !== 0}
+                  isUserPost={post.isUserPost}
+                />
+              </motion.li>
+            ))}
       </AnimatePresence>
-    </ul>
+      {/* Infinite scroll loader */}
+      <InView
+        fallbackInView
+        onChange={async (inView) => {
+          if (inView && hasNextPage && !isFetchingNextPage) {
+            await fetchNextPage()
+          }
+        }}
+      >
+        {({ ref }) => (
+          <li ref={ref} className="mt-4 w-full">
+            <AnimatePresence>
+              {isFetchingNextPage &&
+                Array.from({ length: 2 }, (_, i) => (
+                  <motion.div
+                    key={`fetching-skeleton-${i}`}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                  >
+                    <PostSkeleton />
+                  </motion.div>
+                ))}
+            </AnimatePresence>
+          </li>
+        )}
+      </InView>
+    </motion.ul>
   )
 }
 

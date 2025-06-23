@@ -1,7 +1,8 @@
 "use client"
 
+import React, { useMemo } from "react"
 import { useInfiniteQuery } from "@tanstack/react-query"
-import { motion } from "framer-motion"
+import { motion, AnimatePresence } from "framer-motion"
 import { LoaderCircle } from "lucide-react"
 import { type Comment } from "@/types"
 import { type User } from "@prisma/client"
@@ -13,45 +14,80 @@ interface ViewCommentsProps {
   postId: string
 }
 
+const commentVariants = {
+  hidden: { opacity: 0, y: 10 },
+  visible: { opacity: 1, y: 0 },
+  exit: { opacity: 0, y: -10 },
+}
+
 const ViewComments = ({ postId }: ViewCommentsProps) => {
   const {
     data: comments,
     isPending,
+    isError,
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage,
+    error,
   } = useInfiniteQuery({
     queryKey: ["comments", postId],
     queryFn: ({ pageParam }) =>
-      fetch(`/api/comments/${postId}?limit=${3}&cursor=${pageParam}`).then(
-        (res) => res.json()
-      ),
+      fetch(`/api/comments/${postId}?limit=3&cursor=${pageParam}`).then((res) => res.json()),
     initialPageParam: 0,
     getNextPageParam: (lastPage) => lastPage.nextSkip,
     refetchOnWindowFocus: false,
   })
 
-  console.log(comments)
+  // Flatten comments for easier mapping
+  const allComments = useMemo(
+    () => comments?.pages.flatMap((page) => page?.data || []) || [],
+    [comments]
+  )
 
-  return isPending ? (
-    <div className="flex animate-spin items-center justify-center py-4">
-      <LoaderCircle className="size-6" />
-    </div>
-  ) : (
+  if (isPending) {
+    return (
+      <div className="flex items-center justify-center py-4">
+        <LoaderCircle className="size-6 animate-spin" />
+      </div>
+    )
+  }
+
+  if (isError) {
+    return (
+      <div className="flex items-center justify-center py-4 text-destructive">
+        Failed to load comments.
+      </div>
+    )
+  }
+
+  return (
     <div className="pb-4" id="comment">
       <ul>
-        {comments?.pages.map((page) =>
-          page?.data.map((comment: Comment<User>) => (
+        <AnimatePresence initial={false}>
+          {allComments.length === 0 && (
             <motion.li
-              key={comment.id}
+              key="no-comments"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
+              className="py-4 text-center text-muted-foreground"
+            >
+              No comments yet.
+            </motion.li>
+          )}
+          {allComments.map((comment: Comment<User>, idx) => (
+            <motion.li
+              key={comment.id}
+              variants={commentVariants}
+              initial="hidden"
+              animate="visible"
+              exit="exit"
+              transition={{ duration: 0.25, delay: idx * 0.05, ease: "easeInOut" }}
             >
               <CommentItem comment={comment} postId={postId} />
             </motion.li>
-          ))
-        )}
+          ))}
+        </AnimatePresence>
         {isFetchingNextPage && (
           <div className="flex items-center justify-center py-4">
             <LoaderCircle className="animate-spin text-2xl text-foreground" />

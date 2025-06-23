@@ -9,70 +9,44 @@ import { deletePost } from "@/server/post"
 import type { User } from "@prisma/client"
 import { IPage, IPost } from "@/types"
 
+// Helper to optimistically remove a post from the cache
+function removePostFromCache(
+  oldData: InfiniteData<IPage<IPost<User>[]>> | undefined,
+  postId: string
+): InfiniteData<IPage<IPost<User>[]>> | undefined {
+  if (!oldData) return oldData
+  return {
+    ...oldData,
+    pages: oldData.pages.map((page) => ({
+      ...page,
+      data: page.data.filter((post) => post.id !== postId),
+    })),
+  }
+}
+
 export const useDeletePost = (userId?: string) => {
   const queryClient = useQueryClient()
-  const queryKey = ["posts"]
+  const postsQueryKey = userId ? ["posts", userId] : ["posts"]
 
   const deletePostMutation = useMutation({
     mutationFn: ({ postId }: { postId: string }) => deletePost({ postId }),
-    // onSuccess: () => queryClient.invalidateQueries({ queryKey }),
     onMutate: async (deletedPost) => {
-      await queryClient.cancelQueries({ queryKey })
-
-      const previousComment = queryClient.getQueryData(queryKey)
-
-      if (userId) {
-        queryClient.setQueryData<InfiniteData<IPage<IPost<User>[]>>>(
-          ["posts", userId],
-          (oldData) => {
-            if (!oldData) return
-
-            const newPosts = {
-              ...oldData,
-              pages: oldData.pages.map((page) => {
-                const deletedPosts = page.data.filter(
-                  (post) => post.id !== deletedPost.postId
-                )
-
-                return {
-                  ...page,
-                  posts: deletedPosts,
-                }
-              }),
-            }
-
-            return newPosts
-          }
-        )
-      } else
-        queryClient.setQueryData<InfiniteData<IPage<IPost<User>[]>>>(
-          queryKey,
-          (oldData) => {
-            if (!oldData) return
-
-            const newPosts = {
-              ...oldData,
-              pages: oldData.pages.map((page) => {
-                const deletedPosts = page.data.filter(
-                  (post) => post.id !== deletedPost.postId
-                )
-
-                return {
-                  ...page,
-                  data: deletedPosts,
-                }
-              }),
-            }
-
-            return newPosts
-          }
-        )
-
-      return { previousComment }
+      await queryClient.cancelQueries({ queryKey: postsQueryKey })
+      const previousPosts = queryClient.getQueryData(postsQueryKey)
+      queryClient.setQueryData<InfiniteData<IPage<IPost<User>[]>>>(
+        postsQueryKey,
+        (oldData) => removePostFromCache(oldData, deletedPost.postId)
+      )
+      return { previousPosts }
     },
-    onSettled: () => queryClient.invalidateQueries({ queryKey }),
     onError: (err, variables, context) => {
-      queryClient.setQueryData(queryKey, context?.previousComment)
+      queryClient.setQueryData(postsQueryKey, context?.previousPosts)
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: postsQueryKey })
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: postsQueryKey })
     },
   })
 

@@ -22,6 +22,7 @@ import DeleteDialog from "./delete-dialog"
 import { useDeletePost } from "@/hooks/mutation/posts/use-delete-post"
 import { type User } from "@prisma/client"
 import * as React from "react"
+import { motion, AnimatePresence } from "framer-motion"
 
 interface PostItemProps {
   post: IPost<User>
@@ -34,46 +35,86 @@ const PostItem = React.memo(
   ({ post, havePhoto, isUserPost = true, userId }: PostItemProps) => {
     const [isCommentOpen, setIsCommentOpen] = React.useState(false)
     const [isAlertOpen, setIsAlertOpen] = React.useState(false)
-    const setIsUpdating = usePostStore((state) => state.setIsUpdating)
-    const setIsPostOpen = usePostStore((state) => state.setIsPostOpen)
-    const setSelectedPost = usePostStore((state) => state.setSelectedPost)
-    const { unlikePostMutation } = useUnlikeMutation({
-      postId: post.id,
-      userId,
-    })
-    const { likePostMutation } = useLikePostMutation({
-      postId: post.id,
-      content: post.content,
-      userId,
-    })
 
-    const handleLikePost = React.useCallback(
-      (isLiked: boolean) =>
-        !isLiked ? likePostMutation.mutate() : unlikePostMutation.mutate(),
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-      []
-    )
+    const { setIsUpdating, setIsPostOpen, setSelectedPost } = usePostStore()
 
-    const handleOnAlertOpen = () => {
+    const handleOnAlertOpen = React.useCallback(() => {
       setIsAlertOpen(true)
-    }
+    }, [])
 
-    const handleOnAction = () => {
+    const handleOnAction = React.useCallback(() => {
       setIsPostOpen(true)
       setIsUpdating(true)
-
       setSelectedPost({
         postId: post.id,
         content: post.content,
         selectedFile: post.selectedFile,
       })
-    }
+    }, [post, setIsPostOpen, setIsUpdating, setSelectedPost])
 
     const { deletePostMutation } = useDeletePost(userId)
 
-    const handlDeletePost = () => {
+    const handleDeletePost = React.useCallback(() => {
       deletePostMutation.mutate({ postId: post.id })
-    }
+    }, [deletePostMutation, post.id])
+
+    const handleOpenComment = React.useCallback(() => {
+      setIsCommentOpen(true)
+    }, [])
+
+    // ImageGrid component for post images with animation and hover effect
+    const ImageGrid = React.memo(
+      ({ images }: { images: { url: string }[] }) => (
+        <div
+          className={cn(
+            "relative grid gap-1",
+            images.length > 1 && "!grid-cols-2"
+          )}
+        >
+          <AnimatePresence initial={false}>
+            {images.map((image, index) => (
+              <motion.div
+                key={image.url}
+                layout
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                transition={{ duration: 0.35, ease: "easeInOut" }}
+                className={cn(
+                  "group relative cursor-pointer overflow-hidden rounded",
+                  images.length === 3 && index === 0 && "col-span-2",
+                  images.length === 3 && index === 2 && "self-end"
+                )}
+              >
+                <motion.div
+                  className="relative h-full cursor-pointer active:opacity-80"
+                  tabIndex={0}
+                  role="button"
+                  whileHover={{ scale: 1.04 }}
+                  whileTap={{ scale: 0.98 }}
+                  transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                >
+                  <div className="h-60 w-full md:h-96">
+                    <Image
+                      src={image.url}
+                      style={{ objectFit: "cover" }}
+                      alt={image.url}
+                      fill
+                      unoptimized
+                      className="opacity-0 transition-opacity duration-300 group-hover:opacity-90"
+                      onLoadingComplete={(img) =>
+                        img.classList.remove("opacity-0")
+                      }
+                    />
+                  </div>
+                </motion.div>
+              </motion.div>
+            ))}
+          </AnimatePresence>
+        </div>
+      )
+    )
+    ImageGrid.displayName = "ImageGrid"
 
     return (
       <>
@@ -128,61 +169,11 @@ const PostItem = React.memo(
             {post.content}
           </span>
           {post.selectedFile.length !== 0 && (
-            <div
-              className={cn(
-                "relative grid gap-1",
-                post.selectedFile.length > 1 && "!grid-cols-2"
-              )}
-            >
-              {post.selectedFile.map((image, index) => {
-                return (
-                  <div
-                    key={image.url}
-                    className={cn(
-                      "relative cursor-pointer overflow-hidden rounded",
-                      post.selectedFile.length === 3 &&
-                        index === 0 &&
-                        "col-span-2",
-                      post.selectedFile.length === 3 &&
-                        index === 2 &&
-                        "self-end"
-                    )}
-                  >
-                    <div
-                      className="relative h-full cursor-pointer active:opacity-80"
-                      tabIndex={0}
-                      role="button"
-                    >
-                      <div className="h-60 w-full md:h-96">
-                        <Image
-                          src={image.url}
-                          style={{ objectFit: "cover" }}
-                          alt={image.url}
-                          fill
-                          unoptimized
-                        />
-                      </div>
-                    </div>
-                  </div>
-                )
-              })}
-            </div>
+            <ImageGrid images={post.selectedFile} />
           )}
         </div>
 
         <div className="mt-2 flex items-center justify-between px-5">
-          <div className="flex items-center gap-1 text-sm text-foreground">
-            <span className="flex size-5 items-center justify-center rounded-full bg-primary">
-              <IoMdHeart
-                aria-hidden
-                className="size-4 text-primary-foreground"
-              />
-            </span>
-
-            <span className="font-medium text-foreground/60">
-              {post._count.likePost}
-            </span>
-          </div>
           <div className="flex gap-1 text-sm font-semibold text-muted-foreground/80">
             <span>{post._count.comment}</span>
             <MessageCircle aria-hidden size={20} />
@@ -190,13 +181,17 @@ const PostItem = React.memo(
         </div>
         <ul className="rou mx-1 mt-1 flex justify-between rounded-t-md border-t border-l-secondary/40 font-light">
           <li className="w-full flex-1 py-1">
-            <LikePost isLiked={post.isLiked} handleLikePost={handleLikePost} />
+            <LikePost
+              isLiked={post.isLiked}
+              content={post.content}
+              likeCounts={post._count.likePost}
+              postId={post.id}
+            />
           </li>
 
           <li className="w-full flex-1 py-1">
             <Button
-              // type="button"
-              onClick={() => setIsCommentOpen(true)}
+              onClick={handleOpenComment}
               variant="ghost"
               className={cn(
                 "flex h-[35px] w-full items-center justify-center gap-1 text-foreground/60 hover:bg-secondary",
@@ -240,9 +235,8 @@ const PostItem = React.memo(
           isAlertOpen={isAlertOpen}
           setIsAlertOpen={setIsAlertOpen}
           isDisabled={deletePostMutation.isPending}
-          onHandleDelete={handlDeletePost}
-          description="This action cannot be undone. This will permanently delete your post
-            and remove your data from our servers."
+          onHandleDelete={handleDeletePost}
+          description="This action cannot be undone. This will permanently delete your post\n            and remove your data from our servers."
         />
         {/* <DeletePost
           postId={post.id}
