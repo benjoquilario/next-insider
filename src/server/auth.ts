@@ -100,5 +100,5 @@ export const createUser = validatedAction(
 )
 
 export async function signOut() {
-  ;(await cookies()).delete("session")
+  return (await cookies()).delete("session")
 }
