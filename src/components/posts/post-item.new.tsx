@@ -3,12 +3,10 @@
 import Link from "next/link"
 import { cn } from "@/lib/utils"
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar"
-
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardFooter, CardHeader } from "../ui/card"
 import { IoMdShareAlt } from "react-icons/io"
 import type { IPost } from "@/types"
-// import type { User } from "@prisma/client"
 import LikePost from "./like/like-post"
 import Comments from "./comments"
 import { MessageCircle } from "lucide-react"
@@ -116,118 +114,137 @@ const PostItem = React.memo(
 
     return (
       <>
-        <div className="flex items-center gap-3">
-          <Link
-            href={`/profile/`}
-            className={cn(
-              "ring-primary focus-visible:outline-primary focus-visible:ring-primary rounded-full ring-offset-1 focus-visible:outline-offset-3 active:ring"
-            )}
-          >
-            <Avatar>
-              <AvatarImage
-                src={post.user.image ?? "/default-image.png"}
-                alt={""}
-              />
-              <AvatarFallback>
-                <div className="size-full animate-pulse"></div>
-              </AvatarFallback>
-            </Avatar>
-          </Link>
-          <div className="mr-auto flex flex-col gap-1 self-center leading-none">
+        <Card
+          className={cn(
+            "overflow-hidden rounded-xl",
+            isCommentOpen && "rounded-b-none"
+          )}
+          style={
+            isCommentOpen
+              ? { borderBottomLeftRadius: 0, borderBottomRightRadius: 0 }
+              : undefined
+          }
+        >
+          <CardHeader className="p-3">
             <div className="flex items-center gap-3">
               <Link
-                href={`/profile/`}
+                href={`/profile/${post.user.id}`}
                 className={cn(
-                  "text-foreground/60 block text-[15px] font-bold capitalize underline-offset-1 hover:underline"
+                  "ring-primary focus-visible:outline-primary focus-visible:ring-primary rounded-full ring-offset-1 focus-visible:outline-offset-3 active:ring"
                 )}
               >
-                {post.user.name}
+                <Avatar>
+                  <AvatarImage
+                    src={post.user.image ?? "/default-image.png"}
+                    alt={""}
+                  />
+                  <AvatarFallback>
+                    <div className="size-full animate-pulse"></div>
+                  </AvatarFallback>
+                </Avatar>
               </Link>
+              <div className="mr-auto flex flex-col gap-1 self-center leading-none">
+                <div className="flex items-center gap-3">
+                  <Link
+                    href={`/profile/${post.user.id}`}
+                    className={cn(
+                      "text-foreground/60 block text-[15px] font-bold capitalize underline-offset-1 hover:underline"
+                    )}
+                  >
+                    {post.user.name}
+                  </Link>
+                </div>
+                <span className="text-muted-foreground/80 text-[13px]">
+                  {dayjs(post.createdAt).fromNow()}
+                </span>
+              </div>
+              {isUserPost ? (
+                <DropdownAction
+                  className="self-start"
+                  onAlertOpen={handleOnAlertOpen}
+                  onAction={handleOnAction}
+                />
+              ) : null}
+            </div>
+          </CardHeader>
+
+          <CardContent className="px-3 font-normal md:px-5">
+            <span
+              className={cn(
+                "text-foreground/80 text-base break-words",
+                havePhoto ? "text-base" : "text-2xl"
+              )}
+            >
+              {post.content}
+            </span>
+            {post.selectedFile.length !== 0 && (
+              <div className="mt-3">
+                <ImageGrid images={post.selectedFile} />
+              </div>
+            )}
+            <div className="mt-2 flex items-center justify-between">
+              <div className="text-muted-foreground/80 flex gap-1 text-sm font-semibold">
+                <span>{post._count.comment}</span>
+                <MessageCircle aria-hidden size={20} />
+              </div>
+            </div>
+          </CardContent>
+
+          <CardFooter className="flex justify-between border-t px-0 pb-0">
+            <div className="w-full flex-1 py-1">
+              <LikePost
+                isLiked={post.isLiked}
+                content={post.content}
+                likeCounts={post._count.likePost}
+                postId={post.id}
+              />
             </div>
 
-            <span className="text-muted-foreground/80 text-[13px]">
-              {dayjs(post.createdAt).fromNow()}
-            </span>
-          </div>
-          {isUserPost ? (
-            <DropdownAction
-              className="self-end"
-              onAlertOpen={handleOnAlertOpen}
-              onAction={handleOnAction}
-            />
-          ) : null}
-        </div>
-        <div className="px-3 font-normal md:px-5">
-          <span
-            className={cn(
-              "text-foreground/80 text-base break-words",
-              havePhoto ? "text-base" : "text-2xl"
-            )}
-          >
-            {post.content}
-          </span>
-          {post.selectedFile.length !== 0 && (
-            <ImageGrid images={post.selectedFile} />
-          )}
-        </div>
+            <div className="w-full flex-1 py-1">
+              <Button
+                onClick={handleOpenComment}
+                variant="ghost"
+                className={cn(
+                  "cursor-pointer",
+                  "text-foreground/60 hover:bg-secondary flex h-[35px] w-full items-center justify-center gap-1",
+                  "focus-visible:outline-primary focus-visible:ring-primary focus-visible:outline-offset-2",
+                  isCommentOpen && "bg-secondary"
+                )}
+                aria-label="Leave a Comment"
+              >
+                <MessageCircle
+                  aria-hidden="true"
+                  className="text-foreground/90 size-5"
+                />
+                <span className="text-foreground-80 text-sm font-semibold">
+                  Comment
+                </span>
+              </Button>
+            </div>
+            <div className="w-full flex-1 py-1">
+              <Button
+                variant="ghost"
+                type="button"
+                aria-label="Share a post"
+                className={cn(
+                  "cursor-pointer",
+                  "text-foreground/60 hover:bg-secondary flex h-[35px] w-full items-center justify-center gap-1 rounded-md",
+                  "focus-visible:outline-primary focus-visible:ring-primary focus-visible:outline-offset-2"
+                )}
+              >
+                <IoMdShareAlt
+                  aria-hidden="true"
+                  size={20}
+                  className="text-foreground/90"
+                />
+                <span className="text-foreground/80 text-sm font-semibold">
+                  Share
+                </span>
+              </Button>
+            </div>
+          </CardFooter>
+        </Card>
 
-        <div className="mt-2 flex items-center justify-between px-5">
-          <div className="text-muted-foreground/80 flex gap-1 text-sm font-semibold">
-            <span>{post._count.comment}</span>
-            <MessageCircle aria-hidden size={20} />
-          </div>
-        </div>
-        <ul className="rou border-l-secondary/40 mx-1 mt-1 flex justify-between rounded-t-md border-t font-light">
-          <li className="w-full flex-1 py-1">
-            <LikePost
-              isLiked={post.isLiked}
-              content={post.content}
-              likeCounts={post._count.likePost}
-              postId={post.id}
-            />
-          </li>
-
-          <li className="w-full flex-1 py-1">
-            <Button
-              onClick={handleOpenComment}
-              variant="ghost"
-              className={cn(
-                "text-foreground/60 hover:bg-secondary flex h-[35px] w-full items-center justify-center gap-1",
-                "focus-visible:outline-primary focus-visible:ring-primary focus-visible:outline-offset-2",
-                isCommentOpen && "bg-secondary"
-              )}
-              aria-label="Leave a Comment"
-            >
-              <MessageCircle
-                aria-hidden="true"
-                className="text-foreground/90 size-5"
-              />
-              <span className="text-foreground-80 text-sm font-semibold">
-                Comment
-              </span>
-            </Button>
-          </li>
-          <li className="w-full flex-1 py-1">
-            <Button
-              variant="ghost"
-              type="button"
-              aria-label="Share a post"
-              className={cn(
-                "text-foreground/60 hover:bg-secondary flex h-[35px] w-full items-center justify-center gap-1 rounded-md",
-                "focus-visible:outline-primary focus-visible:ring-primary focus-visible:outline-offset-2"
-              )}
-            >
-              <IoMdShareAlt
-                aria-hidden="true"
-                size={20}
-                className="text-foreground/90"
-              />
-              <span className="text-foreground/80 text-sm font-semibold">
-                Share
-              </span>
-            </Button>
-          </li>
-        </ul>
         <DeleteDialog
           id={post.id}
           isAlertOpen={isAlertOpen}
@@ -236,11 +253,6 @@ const PostItem = React.memo(
           onHandleDelete={handleDeletePost}
           description="This action cannot be undone. This will permanently delete your post\n            and remove your data from our servers."
         />
-        {/* <DeletePost
-          postId={post.id}
-          setIsAlertOpen={setIsAlertOpen}
-          isAlertOpen={isAlertOpen}
-        /> */}
         {isCommentOpen ? <Comments postId={post.id} /> : null}
       </>
     )

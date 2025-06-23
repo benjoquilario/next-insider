@@ -1,7 +1,7 @@
 "use client"
 
 import React from "react"
-import PostItem from "./post-item"
+import PostItem from "./post-item.new"
 import { useInfiniteQuery } from "@tanstack/react-query"
 // import { QUERY_KEYS } from "@/lib/queriesKey"
 // import PostSkeleton from "@/components/skeleton/post-skeleton"
@@ -51,13 +51,15 @@ const Posts = () => {
       variants={{}}
     >
       <AnimatePresence>
-        {isPending
-          ? Array.from({ length: 2 }, (_, i) => (
-              <li key={`post-${i}-skeleton`}>
-                <PostSkeleton />
-              </li>
-            ))
-          : allPosts.map((post: IPost<User>, idx) => (
+        {isPending ? (
+          Array.from({ length: 2 }, (_, i) => (
+            <li key={`post-${i}-skeleton`}>
+              <PostSkeleton />
+            </li>
+          ))
+        ) : (
+          <>
+            {allPosts.map((post: IPost<User>, idx) => (
               <motion.li
                 key={post.id}
                 variants={postVariants}
@@ -69,7 +71,7 @@ const Posts = () => {
                   delay: idx * 0.07,
                   ease: "easeInOut",
                 }}
-                className="relative z-10 flex flex-col gap-1 overflow-hidden rounded-md border shadow"
+                className="relative z-10 flex flex-col"
               >
                 <PostItem
                   post={post}
@@ -78,6 +80,8 @@ const Posts = () => {
                 />
               </motion.li>
             ))}
+          </>
+        )}
       </AnimatePresence>
       {/* Infinite scroll loader */}
       <InView

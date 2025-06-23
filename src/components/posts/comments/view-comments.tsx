@@ -9,6 +9,7 @@ import { type User } from "@/generated/prisma"
 import { Button } from "@/components/ui/button"
 import CommentItem from "./comment-item"
 import CreateComment from "./create-comment"
+import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
 
 interface ViewCommentsProps {
   postId: string
@@ -64,57 +65,63 @@ const ViewComments = ({ postId }: ViewCommentsProps) => {
 
   return (
     <div className="pb-4" id="comment">
-      <ul>
-        <AnimatePresence initial={false}>
-          {allComments.length === 0 && (
-            <motion.li
-              key="no-comments"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="text-muted-foreground py-4 text-center"
-            >
-              No comments yet.
-            </motion.li>
-          )}
-          {allComments.map((comment: Comment<User>, idx) => (
-            <motion.li
-              key={comment.id}
-              variants={commentVariants}
-              initial="hidden"
-              animate="visible"
-              exit="exit"
-              transition={{
-                duration: 0.25,
-                delay: idx * 0.05,
-                ease: "easeInOut",
-              }}
-            >
-              <CommentItem comment={comment} postId={postId} />
-            </motion.li>
-          ))}
-        </AnimatePresence>
-        {isFetchingNextPage && (
-          <div className="flex items-center justify-center py-4">
-            <LoaderCircle className="text-foreground animate-spin text-2xl" />
+      <Card className="rounded-t-none rounded-tl-none rounded-tr-none">
+        <CardContent className="p-0">
+          <ul>
+            <AnimatePresence initial={false}>
+              {allComments.length === 0 && (
+                <motion.li
+                  key="no-comments"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="text-muted-foreground py-4 text-center"
+                >
+                  No comments yet.
+                </motion.li>
+              )}
+              {allComments.map((comment: Comment<User>, idx) => (
+                <motion.li
+                  key={comment.id}
+                  variants={commentVariants}
+                  initial="hidden"
+                  animate="visible"
+                  exit="exit"
+                  transition={{
+                    duration: 0.25,
+                    delay: idx * 0.05,
+                    ease: "easeInOut",
+                  }}
+                >
+                  <CommentItem comment={comment} postId={postId} />
+                </motion.li>
+              ))}
+            </AnimatePresence>
+            {isFetchingNextPage && (
+              <div className="flex items-center justify-center py-4">
+                <LoaderCircle className="text-foreground animate-spin text-2xl" />
+              </div>
+            )}
+            {!isFetchingNextPage && hasNextPage && (
+              <li className="ml-4">
+                <Button
+                  variant="ghost"
+                  type="button"
+                  onClick={() => fetchNextPage()}
+                  className="underline-offset-1 hover:underline"
+                >
+                  View more comments
+                </Button>
+              </li>
+            )}
+          </ul>
+        </CardContent>
+        <CardFooter>
+          <div className="px-3 pt-4 md:px-5">
+            <CreateComment postId={postId} />
           </div>
-        )}
-        {!isFetchingNextPage && hasNextPage && (
-          <li className="ml-4">
-            <Button
-              variant="ghost"
-              type="button"
-              onClick={() => fetchNextPage()}
-              className="underline-offset-1 hover:underline"
-            >
-              View more comments
-            </Button>
-          </li>
-        )}
-      </ul>
-      <div className="px-3 pt-4 md:px-5">
-        <CreateComment postId={postId} />
-      </div>
+        </CardFooter>
+      </Card>
     </div>
   )
 }
