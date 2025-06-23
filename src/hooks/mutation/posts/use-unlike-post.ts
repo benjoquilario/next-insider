@@ -4,7 +4,7 @@ import {
   useQueryClient,
 } from "@tanstack/react-query"
 import { unlikePost } from "@/server/like"
-import type { User } from "@prisma/client"
+import type { User } from "@/generated/prisma"
 import type { IPage, IPost } from "@/types"
 
 // Helper to optimistically update the unlike state in the cache

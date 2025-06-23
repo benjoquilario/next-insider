@@ -6,7 +6,7 @@ import {
   useQueryClient,
 } from "@tanstack/react-query"
 import { updatePost } from "@/server/post"
-import type { User } from "@prisma/client"
+import type { User } from "@/generated/prisma"
 import type { UpdatePost, IPage, IPost } from "@/types"
 
 // Helper to update the post in the cache
@@ -18,7 +18,9 @@ function updateCachedPost(
   return {
     ...oldData,
     pages: oldData.pages.map((page) => {
-      const index = page.data?.findIndex((oldPost) => oldPost.id === updatedPost.postId)
+      const index = page.data?.findIndex(
+        (oldPost) => oldPost.id === updatedPost.postId
+      )
       if (index === undefined || index === -1) return page
       const newPosts = [...page.data]
       newPosts[index] = {

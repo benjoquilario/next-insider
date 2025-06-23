@@ -6,7 +6,7 @@ import {
   useQueryClient,
 } from "@tanstack/react-query"
 import { likeReplyComment, unlikeReplyComment } from "@/server/like"
-import type { User } from "@prisma/client"
+import type { User } from "@/generated/prisma"
 import { useMemo } from "react"
 import { IPage, ReplyComment } from "@/types"
 
@@ -27,7 +27,7 @@ export function useLikeReplyCommentMutation({
       const response = await likeReplyComment({ replyId, content })
 
       if (!response?.ok) {
-        if (response?.status === 409) return
+        return
       }
 
       return true
@@ -85,7 +85,7 @@ export function useLikeReplyCommentMutation({
       const response = await unlikeReplyComment({ replyId })
 
       if (!response?.ok) {
-        if (response?.status === 409) return
+        return
       }
 
       return true
