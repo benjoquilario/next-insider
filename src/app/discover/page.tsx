@@ -10,12 +10,14 @@ import { Button } from "@/components/ui/button"
 import {
   Select,
   SelectItem,
-  SelectLabel,
-  SelectContent,
   SelectTrigger,
   SelectValue,
+  SelectContent,
 } from "@/components/ui/select"
 import ThemeToggle from "@/components/theme-toggle"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import Link from "next/link"
+import { useDebounce } from "@/hooks/use-debounce"
 
 // Helper to get age from birthDate
 function getAge(birthDate: string | null | undefined) {
@@ -43,6 +45,9 @@ export default function DiscoverPage() {
   const maxAge = searchParams.get("maxAge") || ""
   const name = searchParams.get("name") || ""
 
+  // Debounce the name input
+  const debouncedName = useDebounce(name, 300)
+
   // Update search params in URL
   function setParam(key: string, value: string) {
     const params = new URLSearchParams(searchParams.toString())
@@ -55,7 +60,7 @@ export default function DiscoverPage() {
   const { data: users, isLoading } = useQuery({
     queryKey: [
       "discover-users",
-      { gender, relationshipStatus, minAge, maxAge, name },
+      { gender, relationshipStatus, minAge, maxAge, debouncedName },
     ],
     queryFn: async () => {
       const params = new URLSearchParams()
@@ -64,7 +69,7 @@ export default function DiscoverPage() {
         params.set("relationshipStatus", relationshipStatus)
       if (minAge) params.set("minAge", minAge)
       if (maxAge) params.set("maxAge", maxAge)
-      if (name) params.set("name", name)
+      if (debouncedName) params.set("name", debouncedName)
       const res = await fetch(`/api/discover?${params.toString()}`)
       return res.json()
     },
@@ -78,6 +83,7 @@ export default function DiscoverPage() {
           <ThemeToggle />
         </div>
       </div>
+
       {/* Filter Bar */}
       <motion.form
         layout
@@ -94,7 +100,7 @@ export default function DiscoverPage() {
           className="w-40"
         />
         <Select
-          defaultValue={gender[0]}
+          defaultValue={gender || ""}
           onValueChange={(val) => setParam("gender", val)}
         >
           <SelectTrigger>
@@ -109,7 +115,7 @@ export default function DiscoverPage() {
           </SelectContent>
         </Select>
         <Select
-          defaultValue={relationshipStatus[0]}
+          defaultValue={relationshipStatus || ""}
           onValueChange={(val) => setParam("relationshipStatus", val)}
         >
           <SelectTrigger>
@@ -155,7 +161,6 @@ export default function DiscoverPage() {
         className="grid grid-cols-1 gap-4 sm:grid-cols-2"
         initial="hidden"
         animate="visible"
-        variants={{}}
       >
         <AnimatePresence>
           {isLoading ? (
@@ -181,30 +186,43 @@ export default function DiscoverPage() {
                   delay: idx * 0.07,
                   ease: "easeInOut",
                 }}
-                className="bg-background flex items-center gap-4 rounded-xl p-4 shadow transition-shadow hover:shadow-lg"
               >
-                <img
-                  src={user.image ?? "/default-image.png"}
-                  alt={user.name ?? "User"}
-                  className="size-12 rounded-full border object-cover"
-                />
-                <div className="flex flex-col gap-1">
-                  <span className="text-base font-semibold capitalize">
-                    {user.name}
-                  </span>
-                  <span className="text-muted-foreground text-sm">
-                    {user.email}
-                  </span>
-                  <span className="text-muted-foreground text-xs">
-                    {user.gender ? user.gender : "-"} |{" "}
-                    {user.relationshipStatus
-                      ? user.relationshipStatus.replace(/_/g, " ")
-                      : "-"}
-                  </span>
-                  <span className="text-muted-foreground text-xs">
-                    Age: {getAge(user.birthDate?.toString()) ?? "-"}
-                  </span>
-                </div>
+                <Card className="bg-background flex flex-col rounded-xl shadow transition-shadow hover:shadow-lg">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-4">
+                      <img
+                        src={user.image ?? "/default-image.png"}
+                        alt={user.name ?? "User   "}
+                        className="h-12 w-12 rounded-full border object-cover"
+                      />
+                      <div className="flex flex-col">
+                        <span className="text-base font-semibold capitalize">
+                          {user.name}
+                        </span>
+                        <span className="text-muted-foreground text-sm">
+                          {user.email}
+                        </span>
+                        <span className="text-muted-foreground text-xs">
+                          {user.gender ? user.gender : "-"} |{" "}
+                          {user.relationshipStatus
+                            ? user.relationshipStatus.replace(/_/g, " ")
+                            : "-"}
+                        </span>
+                        <span className="text-muted-foreground text-xs">
+                          Age: {getAge(user.birthDate?.toString()) ?? "-"}
+                        </span>
+                      </div>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <Link
+                      href={`/profile/${user.id}`}
+                      className="text-primary text-xs font-medium hover:underline"
+                    >
+                      View Profile
+                    </Link>
+                  </CardContent>
+                </Card>
               </motion.div>
             ))
           ) : (
