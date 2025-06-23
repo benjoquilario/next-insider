@@ -5,6 +5,37 @@ import db from "@/lib/db"
 import { headers } from "next/headers"
 import { ratelimit } from "@/lib/redis"
 
+async function createNotification({
+  type,
+  userId,
+  fromUserId,
+  postId,
+  commentId,
+  replyId,
+  message,
+}: {
+  type: "POST_LIKE" | "COMMENT_LIKE" | "REPLY_LIKE"
+  userId: string
+  fromUserId: string
+  postId?: string
+  commentId?: string
+  replyId?: string
+  message?: string
+}) {
+  if (userId === fromUserId) return // Don't notify self
+  await db.notification.create({
+    data: {
+      userId,
+      fromUserId,
+      type,
+      postId,
+      commentId,
+      replyId,
+      message,
+    },
+  })
+}
+
 export const likePost = async ({
   postId,
   content,
@@ -67,6 +98,14 @@ export const likePost = async ({
         contentId: postId,
         content,
       },
+    })
+    // Notification
+    await createNotification({
+      type: "POST_LIKE",
+      userId: postLike.post.userId,
+      fromUserId: userId!,
+      postId,
+      message: `${session.name ?? "Someone"} liked your post`,
     })
   }
 
@@ -184,6 +223,14 @@ export const likeComment = async ({
         content,
       },
     })
+    // Notification
+    await createNotification({
+      type: "COMMENT_LIKE",
+      userId: like.comment.userId,
+      fromUserId: userId!,
+      commentId,
+      message: `${session.name ?? "Someone"} liked your comment`,
+    })
   }
 
   return
@@ -299,6 +346,14 @@ export const likeReplyComment = async ({
         contentId: replyId,
       },
     })
+    // Notification
+    await createNotification({
+      type: "REPLY_LIKE",
+      userId: likeReply.reply.userId,
+      fromUserId: userId!,
+      replyId,
+      message: `${session.name ?? "Someone"} liked your reply`,
+    })
   }
 
   return
@@ -340,7 +395,7 @@ export const unlikeReplyComment = async ({ replyId }: { replyId: string }) => {
   if (!isLiked && !likeExist) {
     return {
       ok: false,
-      status: 409,
+      message: "You haven't liked this reply yet",
     }
   }
 

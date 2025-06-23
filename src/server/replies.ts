@@ -5,6 +5,38 @@ import db from "@/lib/db"
 import { ratelimit } from "@/lib/redis"
 import { headers } from "next/headers"
 
+// Helper to create a notification if not self-action
+async function createNotification({
+  type,
+  userId,
+  fromUserId,
+  postId,
+  commentId,
+  replyId,
+  message,
+}: {
+  type: "REPLY"
+  userId: string
+  fromUserId: string
+  postId?: string
+  commentId?: string
+  replyId?: string
+  message?: string
+}) {
+  if (userId === fromUserId) return // Don't notify self
+  await db.notification.create({
+    data: {
+      userId,
+      fromUserId,
+      type,
+      postId,
+      commentId,
+      replyId,
+      message,
+    },
+  })
+}
+
 export async function createReplyComment(comment: {
   content: string
   commentId: string
@@ -55,6 +87,23 @@ export async function createReplyComment(comment: {
       },
     },
   })
+
+  // Fetch the original comment to get the owner
+  const parentComment = await db.comment.findUnique({
+    where: { id: commentId },
+    select: { userId: true, postId: true },
+  })
+  if (parentComment) {
+    await createNotification({
+      type: "REPLY",
+      userId: parentComment.userId,
+      fromUserId: userId,
+      postId: parentComment.postId,
+      commentId,
+      replyId: createdReply.id,
+      message: `${createdReply.user.name ?? "Someone"} replied to your comment`,
+    })
+  }
 
   return {
     data: createdReply,

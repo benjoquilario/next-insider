@@ -5,7 +5,7 @@ import { getUser } from "@/lib/user"
 import { type CreateComment } from "@/types"
 import { headers } from "next/headers"
 import { ratelimit } from "@/lib/redis"
-import { Prisma } from "@prisma/client"
+import { Prisma } from "@/generated/prisma"
 
 export async function createComment(comment: CreateComment) {
   try {

@@ -6,7 +6,7 @@ import type { CreatePost, UpdatePost } from "@/types"
 import { UTApi } from "uploadthing/server"
 import { ratelimit } from "@/lib/redis"
 import { headers } from "next/headers"
-import { Prisma } from "@prisma/client"
+import { Prisma } from "@/generated/prisma"
 
 export const createPost = async (data: CreatePost) => {
   try {
