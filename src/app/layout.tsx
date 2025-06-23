@@ -1,6 +1,6 @@
+import "./globals.css"
 import type { Metadata } from "next"
 import { Geist, Geist_Mono } from "next/font/google"
-import "./globals.css"
 import { getUser } from "@/lib/user"
 import { AuthProvider } from "@/lib/auth"
 import QueryProvider from "@/components/contexts/query-provider"
@@ -45,16 +45,21 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <Suspense>
-          <AuthProvider userPromise={userPromise}>
-            <QueryProvider>
-              {children}
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="light"
+            enableSystem
+            disableTransitionOnChange
+          >
+            <AuthProvider userPromise={userPromise}>
+              <QueryProvider>
+                {children}
 
-              <Toaster />
-            </QueryProvider>
-          </AuthProvider>
+                <Toaster />
+              </QueryProvider>
+            </AuthProvider>
+          </ThemeProvider>
         </Suspense>
-
-        <ThemeProvider />
       </body>
     </html>
   )
