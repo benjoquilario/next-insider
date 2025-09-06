@@ -1,6 +1,6 @@
 import * as z from "zod"
 import { getUser } from "../user"
-import { type User } from "@/generated/prisma"
+import { type User } from "@/lib/generated/prisma"
 
 export type ActionState = {
   error?: string

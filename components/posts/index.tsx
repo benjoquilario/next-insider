@@ -9,7 +9,7 @@ import { InView } from "react-intersection-observer"
 import { motion, AnimatePresence } from "framer-motion"
 import PostSkeleton from "../skeleton/post-skeleton"
 import { type IPost } from "@/types"
-import { type User } from "@/generated/prisma"
+import { type User } from "@/lib/generated/prisma"
 
 const postVariants = {
   hidden: { opacity: 0, y: 20 },

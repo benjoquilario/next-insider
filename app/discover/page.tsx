@@ -4,7 +4,7 @@ import React from "react"
 import { useSearchParams, useRouter } from "next/navigation"
 import { useQuery } from "@tanstack/react-query"
 import { motion, AnimatePresence } from "framer-motion"
-import { User, Gender, RelationshipStatus } from "@/generated/prisma"
+import { User, Gender, RelationshipStatus } from "@/lib/generated/prisma"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import {
@@ -38,15 +38,16 @@ export default function DiscoverPage() {
   const searchParams = useSearchParams()
   const router = useRouter()
 
+  const [name, setName] = React.useState("")
+
   // Read filters from searchParams
   const gender = searchParams.get("gender") || ""
   const relationshipStatus = searchParams.get("relationshipStatus") || ""
   const minAge = searchParams.get("minAge") || ""
   const maxAge = searchParams.get("maxAge") || ""
-  const name = searchParams.get("name") || ""
 
   // Debounce the name input
-  const debouncedName = useDebounce(name, 300)
+  const debouncedName = useDebounce(name, 400)
 
   // Update search params in URL
   function setParam(key: string, value: string) {
@@ -69,8 +70,9 @@ export default function DiscoverPage() {
         params.set("relationshipStatus", relationshipStatus)
       if (minAge) params.set("minAge", minAge)
       if (maxAge) params.set("maxAge", maxAge)
-      if (debouncedName) params.set("name", debouncedName)
-      const res = await fetch(`/api/discover?${params.toString()}`)
+      const res = await fetch(
+        `/api/discover?${params.toString()}&name=${debouncedName}`
+      )
       return res.json()
     },
   })
@@ -96,7 +98,7 @@ export default function DiscoverPage() {
         <Input
           placeholder="Search by name..."
           value={name}
-          onChange={(e) => setParam("name", e.target.value)}
+          onChange={(e) => setName(e.target.value)}
           className="w-40"
         />
         <Select

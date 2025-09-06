@@ -17,7 +17,7 @@ datasource db {
 model User {
   id              String @id @default(uuid())
   name            String?
-  username        String?
+  username        String? @unique  // Index for unique username lookup
   email           String? @unique
   emailVerified   DateTime?
   image           String?
@@ -49,6 +49,10 @@ model User {
   following       Follow[]      @relation("follower")
 
   notifications    Notification[]   @relation("UserNotifications")
+
+  // Composite indexes for common query patterns
+  @@index([createdAt])  // For sorting users by join date
+  @@index([username, email])  // For user search/lookup
 }
 
 model Account {
@@ -71,6 +75,7 @@ model Account {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([provider, providerAccountId])
+  @@index([userId])  // For finding user accounts
 }
 
 
@@ -83,6 +88,9 @@ model Session {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@index([userId])  // For user session lookup
+  @@index([expires])  // For session cleanup queries
 }
 
 model VerificationToken {
@@ -110,6 +118,12 @@ model Post {
   updatedAt     DateTime @updatedAt
 
   notifications Notification[]
+
+  // Critical indexes for social media queries
+  @@index([userId])  // For user's posts
+  @@index([createdAt])  // For timeline/feed sorting
+  @@index([userId, createdAt])  // For user timeline (most common query)
+  @@index([updatedAt])  // For recently updated posts
 }
 
 model LikePost {
@@ -118,6 +132,10 @@ model LikePost {
   user          User    @relation(fields: [userId], references: [id], onDelete: Cascade)
   postId        String
   post          Post    @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, postId])  // Prevent duplicate likes
+  @@index([postId])  // For counting post likes
+  @@index([userId])  // For user's liked posts
 }
 
 model SelectedFile {
@@ -126,6 +144,9 @@ model SelectedFile {
   post          Post?    @relation(fields: [postId], references: [id], onDelete: Cascade)
   postId        String?
   key           String
+
+  @@index([postId])  // For loading post files
+  @@index([key])  // For file management operations
 }
 
 model Comment {
@@ -144,6 +165,12 @@ model Comment {
   user         User       @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   notifications Notification[]
+
+  // Essential indexes for comment operations
+  @@index([postId])  // For loading post comments
+  @@index([userId])  // For user's comments
+  @@index([postId, createdAt])  // For comment threading/sorting
+  @@index([createdAt])  // For recent comments
 }
 
 model CommentLike {
@@ -172,6 +199,10 @@ model ReplyComment {
   user            User       @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   notifications Notification[]
+
+  @@index([commentId])  // For loading comment replies
+  @@index([userId])  // For user's replies
+  @@index([commentId, createdAt])  // For reply threading/sorting
 }
 
 
@@ -198,6 +229,13 @@ model Activity {
   contentId     String
   sourceUserId  String
   sourceUser    User       @relation("activity",fields: [sourceUserId], references: [id], onDelete: Cascade)
+
+  // Activity feed indexes
+  @@index([targetId])  // For user activity feed
+  @@index([sourceUserId])  // For activities by user
+  @@index([targetId, createdAt])  // For chronological activity feed
+  @@index([type, targetId])  // For filtering activity by type
+  @@index([contentId])  // For finding activities related to specific content
 }
 
 model Follow {
@@ -226,6 +264,13 @@ model Notification {
   comment     Comment? @relation(fields: [commentId], references: [id])
   replyId     String?
   reply       ReplyComment? @relation(fields: [replyId], references: [id])
+
+  // Notification system indexes
+  @@index([userId])  // For user notifications
+  @@index([userId, isRead])  // For unread notifications
+  @@index([userId, createdAt])  // For chronological notifications
+  @@index([type, userId])  // For filtering notifications by type
+  @@index([fromUserId])  // For notifications from specific users
 }
 
 enum NotificationType {

@@ -1,7 +1,7 @@
 import { getUser } from "@/lib/user"
 import * as React from "react"
 import EditProfileForm from "./_components/edit-profile-form"
-import { User } from "@/generated/prisma"
+import { User } from "@/lib/generated/prisma"
 import { redirect } from "next/navigation"
 
 const EditProfile = async () => {

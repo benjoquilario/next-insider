@@ -35,7 +35,7 @@ export interface CreatePost {
   selectedFile: ISelectedFile[] | null
 }
 
-import { User } from "@/generated/prisma"
+import { User } from "@/lib/generated/prisma"
 import { type ClientUploadedFileData } from "uploadthing/types"
 
 export interface Comment<T> {

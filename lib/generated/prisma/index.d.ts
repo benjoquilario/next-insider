@@ -18740,12 +18740,12 @@ export namespace Prisma {
 
   export type UserWhereUniqueInput = Prisma.AtLeast<{
     id?: string
+    username?: string
     email?: string
     AND?: UserWhereInput | UserWhereInput[]
     OR?: UserWhereInput[]
     NOT?: UserWhereInput | UserWhereInput[]
     name?: StringNullableFilter<"User"> | string | null
-    username?: StringNullableFilter<"User"> | string | null
     emailVerified?: DateTimeNullableFilter<"User"> | Date | string | null
     image?: StringNullableFilter<"User"> | string | null
     cover?: StringNullableFilter<"User"> | string | null
@@ -18774,7 +18774,7 @@ export namespace Prisma {
     followers?: FollowListRelationFilter
     following?: FollowListRelationFilter
     notifications?: NotificationListRelationFilter
-  }, "id" | "email">
+  }, "id" | "username" | "email">
 
   export type UserOrderByWithAggregationInput = {
     id?: SortOrder
@@ -19123,6 +19123,7 @@ export namespace Prisma {
 
   export type LikePostWhereUniqueInput = Prisma.AtLeast<{
     id?: string
+    userId_postId?: LikePostUserIdPostIdCompoundUniqueInput
     AND?: LikePostWhereInput | LikePostWhereInput[]
     OR?: LikePostWhereInput[]
     NOT?: LikePostWhereInput | LikePostWhereInput[]
@@ -19130,7 +19131,7 @@ export namespace Prisma {
     postId?: StringFilter<"LikePost"> | string
     user?: XOR<UserScalarRelationFilter, UserWhereInput>
     post?: XOR<PostScalarRelationFilter, PostWhereInput>
-  }, "id">
+  }, "id" | "userId_postId">
 
   export type LikePostOrderByWithAggregationInput = {
     id?: SortOrder
@@ -21205,6 +21206,11 @@ export namespace Prisma {
   export type PostScalarRelationFilter = {
     is?: PostWhereInput
     isNot?: PostWhereInput
+  }
+
+  export type LikePostUserIdPostIdCompoundUniqueInput = {
+    userId: string
+    postId: string
   }
 
   export type LikePostCountOrderByAggregateInput = {

@@ -6,7 +6,7 @@ import {
   useQueryClient,
 } from "@tanstack/react-query"
 import { updatePost } from "@/server/post"
-import type { User } from "@/generated/prisma"
+import type { User } from "@/lib/generated/prisma"
 import type { UpdatePost, IPage, IPost } from "@/types"
 
 // Helper to update the post in the cache

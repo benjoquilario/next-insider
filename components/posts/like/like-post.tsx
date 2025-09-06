@@ -17,8 +17,6 @@ const LikePost = ({ isLiked, likeCounts, postId, content }: LikePostProps) => {
   const [isLikedState, setIsLikedState] = useState(isLiked)
   const [likeCountsState, setLikeCountsState] = useState(likeCounts)
 
-  console.log(likeCounts)
-
   const handleLikePost = async () => {
     if (!isLikedState) {
       setLikeCountsState(likeCountsState + 1)

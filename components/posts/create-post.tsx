@@ -23,7 +23,7 @@ import { useForm } from "react-hook-form"
 import { type PostData } from "@/types"
 import { FileUploader } from "@/components/file-uploader"
 import { useUploadThing } from "@/lib/uploadthing"
-import { getErrorMessage } from "@/lib/handle-error"
+// import { getErrorMessage } from "@/lib/handle-error"
 import { useCreatePostMutation } from "@/hooks/mutation/posts/use-create-post"
 import { useUpdateMutation } from "@/hooks/mutation/posts/use-update-post"
 import { FileSelectedCard } from "@/components/file-uploader"
@@ -189,7 +189,7 @@ const CreatePost = ({ content, selectedFile }: CreatePostProps) => {
                     <FormControl>
                       <textarea
                         aria-label={`What's on your mind, Benjo?`}
-                        className="w-full rounded-t-md bg-background px-0 py-3 text-sm text-foreground/90 focus:outline-none md:text-base"
+                        className="bg-background text-foreground/90 w-full rounded-t-md px-0 py-3 text-sm focus:outline-none md:text-base"
                         placeholder={`What's on your mind, Benjo?`}
                         {...field}
                       />
@@ -250,7 +250,7 @@ const CreatePost = ({ content, selectedFile }: CreatePostProps) => {
               variant="ghost"
               size="sm"
               onClick={reset}
-              className="absolute right-4 top-4 size-8 rounded-sm px-2 opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground"
+              className="ring-offset-background focus:ring-ring data-[state=open]:bg-accent data-[state=open]:text-muted-foreground absolute top-4 right-4 size-8 rounded-sm px-2 opacity-70 transition-opacity hover:opacity-100 focus:ring-2 focus:ring-offset-2 focus:outline-none disabled:pointer-events-none"
             >
               <X className="size-4" />
               <span className="sr-only">Close</span>

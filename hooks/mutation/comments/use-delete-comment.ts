@@ -7,7 +7,7 @@ import {
 } from "@tanstack/react-query"
 import { deleteComment } from "@/server/comment"
 import { IPage, Comment } from "@/types"
-import { type User } from "@/generated/prisma"
+import { type User } from "@/lib/generated/prisma"
 
 const useDeleteComment = ({ postId }: { postId: string }) => {
   const queryClient = useQueryClient()

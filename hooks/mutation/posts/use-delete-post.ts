@@ -6,7 +6,7 @@ import {
   useQueryClient,
 } from "@tanstack/react-query"
 import { deletePost } from "@/server/post"
-import type { User } from "@/generated/prisma"
+import type { User } from "@/lib/generated/prisma"
 import { IPage, IPost } from "@/types"
 
 // Helper to optimistically remove a post from the cache

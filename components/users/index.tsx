@@ -1,6 +1,6 @@
 "use client"
 
-import type { User } from "@/generated/prisma"
+import type { User } from "@/lib/generated/prisma"
 import * as React from "react"
 import UserItem from "./user-item"
 import { ScrollArea } from "../ui/scroll-area"

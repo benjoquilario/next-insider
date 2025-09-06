@@ -6,7 +6,7 @@ import {
   InfiniteData,
 } from "@tanstack/react-query"
 import { createPost } from "@/server/post"
-import type { User } from "@/generated/prisma"
+import type { User } from "@/lib/generated/prisma"
 import type { CreatePost, IPage, IPost } from "@/types"
 
 // Helper to update the posts cache with the new post at the top of the first page

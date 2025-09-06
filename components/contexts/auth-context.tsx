@@ -1,5 +1,5 @@
 import * as React from "react"
-import { type User } from "@/generated/prisma"
+import { type User } from "@/lib/generated/prisma"
 
 export type AuthContextType = {
   session: User | null

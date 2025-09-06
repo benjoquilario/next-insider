@@ -18,7 +18,7 @@ import dayjs from "@/lib/time"
 import usePostStore from "@/store/post"
 import DeleteDialog from "./delete-dialog"
 import { useDeletePost } from "@/hooks/mutation/posts/use-delete-post"
-import { type User } from "@/generated/prisma"
+import { type User } from "@/lib/generated/prisma"
 import * as React from "react"
 import { motion, AnimatePresence } from "framer-motion"
 

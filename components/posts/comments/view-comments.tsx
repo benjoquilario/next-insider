@@ -5,7 +5,7 @@ import { useInfiniteQuery } from "@tanstack/react-query"
 import { motion, AnimatePresence } from "framer-motion"
 import { LoaderCircle } from "lucide-react"
 import { type Comment } from "@/types"
-import { type User } from "@/generated/prisma"
+import { type User } from "@/lib/generated/prisma"
 import { Button } from "@/components/ui/button"
 import CommentItem from "./comment-item"
 import CreateComment from "./create-comment"
@@ -116,8 +116,8 @@ const ViewComments = ({ postId }: ViewCommentsProps) => {
             )}
           </ul>
         </CardContent>
-        <CardFooter>
-          <div className="px-3 pt-4 md:px-5">
+        <CardFooter className="w-full">
+          <div className="w-full px-3 pt-4 md:px-5">
             <CreateComment postId={postId} />
           </div>
         </CardFooter>

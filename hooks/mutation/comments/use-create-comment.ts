@@ -6,7 +6,7 @@ import {
   InfiniteData,
 } from "@tanstack/react-query"
 import { createComment } from "@/server/comment"
-import type { User } from "@/generated/prisma"
+import type { User } from "@/lib/generated/prisma"
 import { IPage, Comment, CreateComment } from "@/types"
 import * as React from "react"
 

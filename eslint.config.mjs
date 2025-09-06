@@ -22,6 +22,7 @@ const eslintConfig = [
     },
     ignores: [
       "/src/generated/*",
+      "/lib/generated/*",
       "/dist/*",
       "/node_modules/*",
       "/.next/*",

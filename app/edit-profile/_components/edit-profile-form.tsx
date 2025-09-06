@@ -1,6 +1,6 @@
 "use client"
 
-import { type User } from "@/generated/prisma"
+import { type User } from "@/lib/generated/prisma"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import { userSchema } from "@/lib/validations/user"

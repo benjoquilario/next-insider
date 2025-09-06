@@ -6,7 +6,7 @@ import {
   useQueryClient,
 } from "@tanstack/react-query"
 import { likeReplyComment, unlikeReplyComment } from "@/server/like"
-import type { User } from "@/generated/prisma"
+import type { User } from "@/lib/generated/prisma"
 import { useMemo } from "react"
 import { IPage, ReplyComment } from "@/types"
 

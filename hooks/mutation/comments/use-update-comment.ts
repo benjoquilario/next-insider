@@ -7,7 +7,7 @@ import {
 } from "@tanstack/react-query"
 import { updateComment } from "@/server/comment"
 import type { IPage, Comment } from "@/types"
-import type { User } from "@/generated/prisma"
+import type { User } from "@/lib/generated/prisma"
 import { toast } from "sonner"
 
 const useUpdateComment = ({ postId }: { postId: string }) => {

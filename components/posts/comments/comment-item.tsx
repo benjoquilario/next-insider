@@ -2,7 +2,7 @@
 
 import React from "react"
 import type { Comment } from "@/types"
-import { User } from "@/generated/prisma"
+import { User } from "@/lib/generated/prisma"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"

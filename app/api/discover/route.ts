@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import db from "@/lib/db"
-import type { Gender, RelationshipStatus } from "@/generated/prisma"
+import type { Gender, RelationshipStatus } from "@/lib/generated/prisma"
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url)
