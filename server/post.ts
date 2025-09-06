@@ -7,6 +7,7 @@ import { UTApi } from "uploadthing/server"
 import { ratelimit } from "@/lib/redis"
 import { headers } from "next/headers"
 import { Prisma } from "@/lib/generated/prisma"
+import { PostsCacheManager } from "@/lib/posts-cache-manager"
 
 export const createPost = async (data: CreatePost) => {
   try {
@@ -62,6 +63,9 @@ export const createPost = async (data: CreatePost) => {
         },
       },
     })
+
+    // Invalidate cache after creating new post
+    await PostsCacheManager.invalidateOnNewPost(userId)
 
     return {
       ok: true,
@@ -130,6 +134,9 @@ export const updatePost = async (
         })),
       })
     }
+
+    // Invalidate cache after updating post
+    await PostsCacheManager.invalidateOnNewPost(session.id)
 
     return {
       ok: true,
@@ -202,6 +209,10 @@ export const deletePost = async ({ postId }: { postId: string }) => {
         },
       })
     }
+
+    // Invalidate cache after deleting post
+    await PostsCacheManager.invalidateOnNewPost(session.id)
+
     return {
       ok: true,
       message: "Post deleted successfully",

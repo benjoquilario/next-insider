@@ -4,6 +4,7 @@ import { getUser } from "@/lib/user"
 import db from "@/lib/db"
 import { headers } from "next/headers"
 import { ratelimit } from "@/lib/redis"
+import { PostsCacheManager } from "@/lib/posts-cache-manager"
 
 async function createNotification({
   type,
@@ -107,6 +108,12 @@ export const likePost = async ({
       postId,
       message: `${session.name ?? "Someone"} liked your post`,
     })
+
+    // Invalidate cache after like action
+    await PostsCacheManager.invalidateOnPostInteraction(
+      postId,
+      postLike.post.userId
+    )
   }
 
   return
@@ -155,6 +162,17 @@ export const unlikePost = async ({ postId }: { postId: string }) => {
       id: likeExist?.id,
     },
   })
+
+  // Get the post to find the author for cache invalidation
+  const post = await db.post.findUnique({
+    where: { id: postId },
+    select: { userId: true },
+  })
+
+  if (post) {
+    // Invalidate cache after unlike action
+    await PostsCacheManager.invalidateOnPostInteraction(postId, post.userId)
+  }
 
   return
 }
