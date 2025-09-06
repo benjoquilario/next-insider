@@ -1,0 +1,257 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../lib/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                 String              @id @default(uuid())
+  name               String?
+  username           String?
+  email              String?             @unique
+  emailVerified      DateTime?
+  image              String?
+  cover              String?
+  phoneNumber        String?
+  bio                String?
+  website            String?
+  address            String?
+  gender             Gender?
+  relationshipStatus RelationshipStatus?
+  birthDate          DateTime?
+  hashedPassword     String?
+  password           String?
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
+  sessions           Session[]
+
+  accounts              Account[]
+  posts                 Post[]
+  commentLikes          CommentLike[]
+  replyComment          ReplyComment[]
+  likeReplyComment      LikeReplyComment[]
+  comments              Comment[]
+  likePosts             LikePost[]
+  activities            Activity[]         @relation("activity")
+  activityNotifications Activity[]         @relation("activityNotifications")
+  sentNotifications     Notification[]     @relation("NotificationFromUser")
+  followers             Follow[]           @relation("following")
+  following             Follow[]           @relation("follower")
+
+  notifications Notification[] @relation("UserNotifications")
+}
+
+model Account {
+  id                String  @id @default(uuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(uuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model VerificationToken {
+  id         String   @id @default(uuid())
+  identifier String
+  token      String
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+model Post {
+  id           String         @id @default(uuid())
+  // name          String
+  content      String
+  selectedFile SelectedFile[]
+
+  comment   Comment[]
+  likePost  LikePost[]
+  // bookmark      Bookmark[]
+  // sharedPost    SharePost[]
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+
+  notifications Notification[]
+}
+
+model LikePost {
+  id     String @id @default(uuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  postId String
+  post   Post   @relation(fields: [postId], references: [id], onDelete: Cascade)
+}
+
+model SelectedFile {
+  id     String  @id @default(uuid())
+  url    String
+  post   Post?   @relation(fields: [postId], references: [id], onDelete: Cascade)
+  postId String?
+  key    String
+}
+
+model Comment {
+  id        String   @id @default(cuid())
+  comment   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  isEdited     Boolean?
+  commentLike  CommentLike[]
+  replyComment ReplyComment[]
+
+  postId String
+  post   Post   @relation(fields: [postId], references: [id], onDelete: Cascade)
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  notifications Notification[]
+}
+
+model CommentLike {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  commentId String
+  comment   Comment  @relation(fields: [commentId], references: [id], onDelete: Cascade)
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, commentId])
+}
+
+model ReplyComment {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  content   String
+  isEdited  Boolean?
+
+  commentId        String
+  comment          Comment            @relation(fields: [commentId], references: [id], onDelete: Cascade)
+  likeReplyComment LikeReplyComment[]
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  notifications Notification[]
+}
+
+model LikeReplyComment {
+  id        String       @id @default(cuid())
+  createdAt DateTime     @default(now())
+  replyId   String
+  reply     ReplyComment @relation(fields: [replyId], references: [id], onDelete: Cascade)
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, replyId])
+}
+
+model Activity {
+  id         String       @id @default(cuid())
+  createdAt  DateTime     @default(now())
+  targetId   String
+  targetUser User         @relation("activityNotifications", fields: [targetId], references: [id], onDelete: Cascade)
+  type       Activitytype
+
+  content      String
+  contentId    String
+  sourceUserId String
+  sourceUser   User   @relation("activity", fields: [sourceUserId], references: [id], onDelete: Cascade)
+}
+
+model Follow {
+  id          String @id @default(cuid())
+  follower    User   @relation("follower", fields: [followerId], references: [id], onDelete: Cascade)
+  followerId  String
+  following   User   @relation("following", fields: [followingId], references: [id], onDelete: Cascade)
+  followingId String
+
+  @@unique([followerId, followingId])
+}
+
+model Notification {
+  id         String           @id @default(cuid())
+  userId     String
+  user       User             @relation("UserNotifications", fields: [userId], references: [id], onDelete: Cascade)
+  type       NotificationType
+  message    String?
+  isRead     Boolean          @default(false)
+  createdAt  DateTime         @default(now())
+  fromUserId String?
+  fromUser   User?            @relation("NotificationFromUser", fields: [fromUserId], references: [id])
+  postId     String?
+  post       Post?            @relation(fields: [postId], references: [id])
+  commentId  String?
+  comment    Comment?         @relation(fields: [commentId], references: [id])
+  replyId    String?
+  reply      ReplyComment?    @relation(fields: [replyId], references: [id])
+}
+
+enum NotificationType {
+  FOLLOW
+  POST_LIKE
+  COMMENT
+  REPLY
+  COMMENT_LIKE
+  REPLY_LIKE
+}
+
+enum Activitytype {
+  POST_LIKE
+  FOLLOW_USER
+  CREATE_COMMENT
+  COMMENT_LIKE
+  CREATE_REPLY
+  REPLY_LIKE
+}
+
+enum Gender {
+  FEMALE
+  MALE
+}
+
+enum RelationshipStatus {
+  SINGLE
+  IN_A_RELATIONSHIP
+  ENGAGED
+  MARRIED
+}
